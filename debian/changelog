@@ -15,6 +15,9 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Refresh 20_german_translation (and drop extension).
      - Drop 30_cdk_include.dpatch, no longer relevant: the only used cdk
        include is <cdk/cdk.h>, directly available under /usr/include.
+  * debian/rules:
+     - Remove strange DEB_HOST_ARCH_OS tweaking. It might have been needed
+       long ago, but it seems unlikely that it's still of some use now.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 11 Apr 2009 02:18:11 +0200
 
