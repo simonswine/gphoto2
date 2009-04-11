@@ -12,6 +12,7 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Clean up debian/rules, which already uses the include.
      - Remove 10_getenv_home_copying.dpatch (already disabled), merged
        upstream.
+     - Refresh 20_german_translation (and drop extension).
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 11 Apr 2009 02:18:11 +0200
 
