@@ -9,6 +9,8 @@ gphoto2 (2.4.5-1) unstable; urgency=low
   * Add a watch file to monitor new upstream releases.
   * Patches:
      - Clean up debian/rules, which already uses the include.
+     - Remove 10_getenv_home_copying.dpatch (already disabled), merged
+       upstream.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 11 Apr 2009 02:18:11 +0200
 
