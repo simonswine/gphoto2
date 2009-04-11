@@ -19,6 +19,7 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Remove strange DEB_HOST_ARCH_OS tweaking. It might have been needed
        long ago, but it seems unlikely that it's still of some use now.
      - Remove CFLAGS handling. dpkg is supposed to do that now.
+     - Remove useless comments, whitespaces.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 11 Apr 2009 02:18:11 +0200
 
