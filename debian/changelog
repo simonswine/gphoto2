@@ -1,3 +1,11 @@
+gphoto2 (2.4.5-2) unstable; urgency=low
+
+  * debian/control:
+     - Actually version the B-D on libgphoto2-2-dev, since 2.4.5 is now
+       needed (Closes: #523587).
+
+ -- Cyril Brulebois <kibi@debian.org>  Sat, 11 Apr 2009 14:53:54 +0200
+
 gphoto2 (2.4.5-1) unstable; urgency=low
 
   * New upstream release (Closes: #483807).
