@@ -26,7 +26,7 @@ Homepage: http://www.gphoto.org/proj/gphoto2/
 Package: gphoto2
 Section: utils
 Architecture: any
-Depends: ${shlibs:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: gtkam, gthumb
 Description: The gphoto2 digital camera command-line client
  The gphoto2 library can be used by applications to access various
