@@ -1,53 +1,11 @@
 #!/usr/bin/make -f
 
-include /usr/share/quilt/quilt.make
+# Specific target, we only need to pass a specific flag to ./configure:
+build:
+	dh build --before auto_configure
+	dh_auto_configure -- --without-aalib
+	dh build --after auto_configure
 
-configure: configure-stamp
-configure-stamp: $(QUILT_STAMPFN)
-	dh_testdir
-	CFLAGS="$(CFLAGS)" ./configure --prefix=/usr --sysconfdir=/etc --mandir=\$${prefix}/share/man --without-aalib
-	touch configure-stamp
-
-build: build-stamp
-build-stamp: configure-stamp
-	dh_testdir
-	$(MAKE)
-	touch build-stamp
-
-clean: unpatch
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-	rm -f po/*.gmo
-	rm -f po/stamp-po
-	[ ! -f Makefile ] || $(MAKE) distclean
-	dh_clean
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-	$(MAKE) install DESTDIR=$(CURDIR)/debian/gphoto2
-
-
-binary-indep: build install
-# We have nothing to do by default.
-
-binary-arch: build install
-	dh_testdir -a
-	dh_testroot -a
-	dh_installdocs
-	dh_installchangelogs ChangeLog
-	dh_link -a
-	dh_strip -a
-	dh_compress -a
-	dh_fixperms -a
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+# Everything else:
+%:
+	dh $@
