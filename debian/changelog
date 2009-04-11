@@ -25,14 +25,15 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Remove useless --with-cdk-prefix from ./configure's flags.
      - Drop the dh_makeshlibs call, there's no library here.
      - Various tiny cleanup.
-     - And finally switch to minimal debhelper Makefile, with a single
-       specific target to pass a specific flag (--without-aalib) to
-       ./configure script, plus patch handling, and po/*.gmo removal.
+     - And finally switch to minimal debhelper Makefile, plus patch
+       handling, and po/*.gmo removal.
   * debian/control:
      - Add ${misc:Depends}.
      - Fix build-depends-on-1-revision on libgphoto2-2-dev by removing
        the version completely, since it's satisfied in stable.
      - Bump Standards-Version from 3.7.2 to 3.8.1 (no changes needed).
+     - Add an explicit B-D on libaa1-dev since <aalib.h> is included
+       unconditionally.
   * debian/changelog:
      - Whitespace cleanup.
 

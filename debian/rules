@@ -6,7 +6,7 @@ include /usr/share/quilt/quilt.make
 # to ./configure, hence a specific target:
 build: $(QUILT_STAMPFN)
 	dh build --before auto_configure
-	dh_auto_configure -- --without-aalib
+	dh_auto_configure
 	dh build --after auto_configure
 
 # Make sure patches get unapplied:
