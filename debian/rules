@@ -27,7 +27,7 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 endif
 
 configure: configure-stamp
-configure-stamp: patch
+configure-stamp: $(DPATCH_STAMPFN)
 	dh_testdir
 	CFLAGS="$(CFLAGS)" ./configure --prefix=/usr --sysconfdir=/etc --mandir=\$${prefix}/share/man --without-aalib --with-cdk-prefix=/usr/include/cdk/
 	touch configure-stamp
@@ -38,13 +38,7 @@ build-stamp: configure-stamp
 	$(MAKE)
 	touch build-stamp
 
-patch: patch-stamp
-patch-stamp:
-	dpatch apply-all
-	# make sure configure is newer than configure.ac
-	touch configure
-
-clean: unpatch-stamp
+clean: unpatch
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
@@ -53,11 +47,6 @@ clean: unpatch-stamp
 	[ ! -f Makefile ] || $(MAKE) distclean
 	-rm -rf `pwd`/debian/gphoto2
 	dh_clean
-
-unpatch: unpatch-stamp
-unpatch-stamp:
-	dpatch deapply-all
-	rm -rf patch-stamp debian/patched
 
 install: build
 	dh_testdir
