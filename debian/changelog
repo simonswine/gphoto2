@@ -27,7 +27,7 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Various tiny cleanup.
      - And finally switch to minimal debhelper Makefile, with a single
        specific target to pass a specific flag (--without-aalib) to
-       ./configure script, plus patch handling.
+       ./configure script, plus patch handling, and po/*.gmo removal.
   * debian/changelog:
      - Whitespace cleanup.
 

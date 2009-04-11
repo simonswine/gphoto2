@@ -12,6 +12,7 @@ build: $(QUILT_STAMPFN)
 # Make sure patches get unapplied:
 clean: unpatch
 	dh clean
+	rm -f po/*.gmo
 
 # Everything else:
 %:
