@@ -5,7 +5,7 @@ include /usr/share/quilt/quilt.make
 configure: configure-stamp
 configure-stamp: $(QUILT_STAMPFN)
 	dh_testdir
-	CFLAGS="$(CFLAGS)" ./configure --prefix=/usr --sysconfdir=/etc --mandir=\$${prefix}/share/man --without-aalib --with-cdk-prefix=/usr/include/cdk/
+	CFLAGS="$(CFLAGS)" ./configure --prefix=/usr --sysconfdir=/etc --mandir=\$${prefix}/share/man --without-aalib
 	touch configure-stamp
 
 build: build-stamp
