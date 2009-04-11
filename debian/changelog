@@ -6,6 +6,7 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Add Frederic Peters and myself as Uploaders.
      - Add Vcs-{Git,Browser} fields accordingly.
   * Add a Homepage field.
+  * Add a watch file to monitor new upstream releases.
 
  -- Cyril Brulebois <kibi@debian.org>  Sat, 11 Apr 2009 02:18:11 +0200
 
