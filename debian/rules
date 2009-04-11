@@ -1,10 +1,17 @@
 #!/usr/bin/make -f
 
-# Specific target, we only need to pass a specific flag to ./configure:
-build:
+include /usr/share/quilt/quilt.make
+
+# Need to depend on the patch stamp, and need to pass a specific flag
+# to ./configure, hence a specific target:
+build: $(QUILT_STAMPFN)
 	dh build --before auto_configure
 	dh_auto_configure -- --without-aalib
 	dh build --after auto_configure
+
+# Make sure patches get unapplied:
+clean: unpatch
+	dh clean
 
 # Everything else:
 %:
