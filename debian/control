@@ -19,6 +19,8 @@ Build-Depends: debhelper (>> 5.0.0),
                libpopt-dev
 Build-Conflicts: liblockdev1-dev
 Standards-Version: 3.7.2
+Vcs-Browser: http://git.debian.org/?p=pkg-phototools/gphoto2.git
+Vcs-Git: git://git.debian.org/git/pkg-phototools/gphoto2.git
 
 Package: gphoto2
 Section: utils
