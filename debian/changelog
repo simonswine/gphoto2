@@ -27,6 +27,9 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Various tiny cleanup.
      - And finally switch to minimal debhelper Makefile, plus patch
        handling, and po/*.gmo removal.
+     - Additionally set LDFLAGS="-Wl,-z,defs -Wl,--as-needed" when auto
+       configuring to avoid some extra dependencies (libX11, libslang, and
+       libsub).
   * debian/control:
      - Add ${misc:Depends}.
      - Fix build-depends-on-1-revision on libgphoto2-2-dev by removing
