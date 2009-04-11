@@ -5,7 +5,7 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-include /usr/share/dpatch/dpatch.make 
+include /usr/share/quilt/quilt.make
 
 DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
 ifeq ($(DEB_HOST_ARCH_OS),)
@@ -27,7 +27,7 @@ ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 endif
 
 configure: configure-stamp
-configure-stamp: $(DPATCH_STAMPFN)
+configure-stamp: $(QUILT_STAMPFN)
 	dh_testdir
 	CFLAGS="$(CFLAGS)" ./configure --prefix=/usr --sysconfdir=/etc --mandir=\$${prefix}/share/man --without-aalib --with-cdk-prefix=/usr/include/cdk/
 	touch configure-stamp
