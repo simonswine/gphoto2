@@ -30,6 +30,8 @@ gphoto2 (2.4.5-1) unstable; urgency=low
        ./configure script, plus patch handling, and po/*.gmo removal.
   * debian/control:
      - Add ${misc:Depends}.
+     - Fix build-depends-on-1-revision on libgphoto2-2-dev by removing
+       the version completely, since it's satisfied in stable.
   * debian/changelog:
      - Whitespace cleanup.
 

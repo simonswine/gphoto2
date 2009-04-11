@@ -6,7 +6,7 @@ Uploaders: Frederic Peters <fpeters@debian.org>, Cyril Brulebois <kibi@debian.or
 Build-Depends: debhelper (>= 7),
                quilt,
                type-handling (>= 0.2.1),
-               libgphoto2-2-dev (>= 2.4.0-1),
+               libgphoto2-2-dev,
                zlib1g-dev,
                libtool,
                libgpmg1-dev | not+linux-gnu,
