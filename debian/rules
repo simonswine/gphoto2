@@ -18,10 +18,9 @@ clean: unpatch
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
-	rm -f `pwd`/po/*.gmo
-	rm -f `pwd`/po/stamp-po
+	rm -f po/*.gmo
+	rm -f po/stamp-po
 	[ ! -f Makefile ] || $(MAKE) distclean
-	-rm -rf `pwd`/debian/gphoto2
 	dh_clean
 
 install: build
@@ -29,11 +28,7 @@ install: build
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-
-	$(MAKE) install prefix=`pwd`/debian/gphoto2/usr
-
-	# remove upstream 0-byte files to make lintian happy
-	-find debian/gphoto2/ -size 0 -exec rm '{}' ';'
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/gphoto2
 
 
 binary-indep: build install
@@ -48,7 +43,6 @@ binary-arch: build install
 	dh_strip -a
 	dh_compress -a
 	dh_fixperms -a
-	dh_makeshlibs -a -V
 	dh_installdeb
 	dh_shlibdeps
 	dh_gencontrol

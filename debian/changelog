@@ -23,6 +23,8 @@ gphoto2 (2.4.5-1) unstable; urgency=low
      - Remove CFLAGS handling. dpkg is supposed to do that now.
      - Remove useless comments, whitespaces.
      - Remove useless --with-cdk-prefix from ./configure's flags.
+     - Drop the dh_makeshlibs call, there's no library here.
+     - Various tiny cleanup.
   * debian/changelog:
      - Whitespace cleanup.
 
