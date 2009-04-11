@@ -1,3 +1,9 @@
+gphoto2 (2.4.5-1) unstable; urgency=low
+
+  * New upstream release (Closes: #483807).
+
+ -- Cyril Brulebois <kibi@debian.org>  Sat, 11 Apr 2009 02:18:11 +0200
+
 gphoto2 (2.4.0-1) unstable; urgency=low
 
   * New upstream release.
