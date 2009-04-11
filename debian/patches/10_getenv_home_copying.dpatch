@@ -1,0 +1,21 @@
+#! /bin/sh /usr/share/dpatch/dpatch-run
+## 10_getenv_home_copying.dpatch by  <fpeters@debian.org>
+##
+## All lines beginning with `## DP:' are a description of the patch.
+## DP: don't copy more characters from $HOME than possible in buffer
+## DP: (applied upstream as revision 10454)
+
+@DPATCH@
+diff -urNad gphoto2-2.3.1~/gphoto2/shell.c gphoto2-2.3.1/gphoto2/shell.c
+--- gphoto2-2.3.1~/gphoto2/shell.c	2006-11-25 15:47:15.000000000 +0100
++++ gphoto2-2.3.1/gphoto2/shell.c	2007-07-19 15:45:39.800390134 +0200
+@@ -575,7 +575,8 @@
+ 			cli_error_print (_("Could not find home directory."));
+ 			return (GP_OK); 
+ 		}
+-		strcpy (new_cwd, getenv ("HOME"));
++		strncpy (new_cwd, getenv ("HOME"), sizeof(new_cwd)-1);
++		new_cwd[sizeof(new_cwd)-1] = '\0';
+ 	} else
+ 		shell_construct_path (cwd, arg, new_cwd, NULL);
+ 
