@@ -2,8 +2,9 @@ gphoto2 (2.4.10-1) UNRELEASED; urgency=low
 
   * New upstream version
   * Added myself to Uploaders
+  * Use "3.0 (quilt)" source format, drop all quilt machinery
 
- -- David Paleino <dapal@debian.org>  Fri, 12 Nov 2010 10:25:33 +0100
+ -- David Paleino <dapal@debian.org>  Fri, 12 Nov 2010 10:27:03 +0100
 
 gphoto2 (2.4.5-3) unstable; urgency=low
 

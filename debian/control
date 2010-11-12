@@ -5,7 +5,6 @@ Maintainer: Debian PhotoTools Maintainers <pkg-phototools-devel@lists.alioth.deb
 Uploaders: Frederic Peters <fpeters@debian.org>, Cyril Brulebois <kibi@debian.org>
  , David Paleino <dapal@debian.org>
 Build-Depends: debhelper (>= 7),
-               quilt,
                type-handling (>= 0.2.1),
                libgphoto2-2-dev (>= 2.4.5),
                zlib1g-dev,

@@ -1,16 +1,14 @@
 #!/usr/bin/make -f
 
-include /usr/share/quilt/quilt.make
-
 # Need to depend on the patch stamp, and need to pass a specific flag
 # to ./configure, hence a specific target:
-build: $(QUILT_STAMPFN)
+build:
 	dh build --before auto_configure
 	dh_auto_configure -- LDFLAGS="-Wl,-z,defs -Wl,--as-needed"
 	dh build --after auto_configure
 
 # Make sure patches get unapplied:
-clean: unpatch
+clean:
 	dh clean
 	# Make sure l10n files are properly rebuilt:
 	rm -f po/stamp-po po/*.gmo
