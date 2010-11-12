@@ -5,8 +5,9 @@ gphoto2 (2.4.10-1) UNRELEASED; urgency=low
   * Use "3.0 (quilt)" source format, drop all quilt machinery
   * Use overrides to minimize debian/rules even more
   * Bump Standards-Version to 3.9.1, no changes needed
+  * Drop usage of type-handling -- use architecture wildcard instead
 
- -- David Paleino <dapal@debian.org>  Fri, 12 Nov 2010 10:30:02 +0100
+ -- David Paleino <dapal@debian.org>  Fri, 12 Nov 2010 10:30:57 +0100
 
 gphoto2 (2.4.5-3) unstable; urgency=low
 
