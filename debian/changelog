@@ -7,8 +7,9 @@ gphoto2 (2.4.10-1) UNRELEASED; urgency=low
   * Bump Standards-Version to 3.9.1, no changes needed
   * Drop usage of type-handling -- use architecture wildcard instead
   * debian/patches/01-handle_EACCES.patch refreshed
+  * debian/patches/20_german_translation removed, merged upstream
 
- -- David Paleino <dapal@debian.org>  Sun, 14 Nov 2010 18:56:41 +0100
+ -- David Paleino <dapal@debian.org>  Sun, 14 Nov 2010 19:04:01 +0100
 
 gphoto2 (2.4.5-3) unstable; urgency=low
 
