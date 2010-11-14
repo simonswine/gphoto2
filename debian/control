@@ -24,7 +24,6 @@ Vcs-Git: git://git.debian.org/git/pkg-phototools/gphoto2.git
 Homepage: http://www.gphoto.org/proj/gphoto2/
 
 Package: gphoto2
-Section: utils
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: gtkam, gthumb
