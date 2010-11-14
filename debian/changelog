@@ -8,8 +8,9 @@ gphoto2 (2.4.10-1) UNRELEASED; urgency=low
   * Drop usage of type-handling -- use architecture wildcard instead
   * debian/patches/01-handle_EACCES.patch refreshed
   * debian/patches/20_german_translation removed, merged upstream
+  * Bump requirement on libgphoto2-2 to >= 2.4.10
 
- -- David Paleino <dapal@debian.org>  Sun, 14 Nov 2010 19:04:01 +0100
+ -- David Paleino <dapal@debian.org>  Sun, 14 Nov 2010 19:21:39 +0100
 
 gphoto2 (2.4.5-3) unstable; urgency=low
 
