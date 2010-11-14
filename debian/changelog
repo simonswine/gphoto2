@@ -2,8 +2,9 @@ gphoto2 (2.4.5-3) UNRELEASED; urgency=low
 
   * Warn and exit with an error if files couldn't be written to
     disk (Closes: #512883)
+  * Added myself to Uploaders
 
- -- David Paleino <dapal@debian.org>  Sun, 14 Nov 2010 16:25:02 +0100
+ -- David Paleino <dapal@debian.org>  Sun, 14 Nov 2010 17:13:42 +0100
 
 gphoto2 (2.4.5-2) unstable; urgency=low
 
