@@ -1,3 +1,10 @@
+gphoto2 (2.4.10-2) UNRELEASED; urgency=low
+
+  * Removing KiBi from Uploaders, as requested. Thanks for all your
+    previous work!
+
+ -- David Paleino <dapal@debian.org>  Mon, 03 Jan 2011 01:44:20 +0100
+
 gphoto2 (2.4.10-1) experimental; urgency=low
 
   * New upstream version
