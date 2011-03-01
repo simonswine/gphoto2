@@ -1,7 +1,54 @@
+gphoto2 2.4.10
+
+ * Event loop handling non-waitevent able cameras.
+
+ * --capture-movie (optional arguments: frames, or seconds)
+   now loops over preview capture as fast as possible
+   and writes the frames continously.
+
+   The resulting file is "MotionJPEG" and can be postprocessed
+   or displayed (by mplayer).
+
+   Also output to stdout is possible for pipeing like:
+	   gphoto2 --stdout --capture-movie | someotherprogram
+
+gphoto2 2.4.9
+
+ * Capture main event loop rewritten to always use wait event
+   to also support multiple image captures. (JPEG+RAW)
+ * Fixed various bugs and memory leaks.
+ * Translation updates.
+
+gphoto2 2.4.8
+
+ * Output CAPTURECOMPLETE on waitevent
+ * On --filename "foo/bar/berk.jpg" create subdirectories if
+   not yet present.
+ * New shell command:
+	capture-preview
+ * Added Bulb Mode in interval capture with -B / --bulb <seconds>
+
+gphoto2 2.4.7
+
+ * New cmdline options: --set-config-index and --set-config-value
+   to avoid ambiguity of the --set-config supporting both modes.
+ * --wait-event can take "5s" as argument for 5 seconds of event taking
+ * added --wait-event-and-download=x (same as --wait-event but with download)
+ * New shell commands:
+	   wait-event (events or seconds)
+	   wait-event-and-download (events or seconds)
+	   capture-tethered 
+	   set-config-index entry=choiceindex
+	   set-config-value entry=value
+ * Enhanced --quietness.
+ * Added AC_SYS_LARGEFILE, enabling support to download files > 2GB.
+ * Updated translations.
+ * Various bugfixes.
+
 gphoto2 2.4.5
 
- * Updated translations
- * Pressing Ctrl-C in tethered capture mode works now.
+ * Updated translations.
+ * Handle ctrl-c on tethered capture.
 
 gphoto2 2.4.4
 

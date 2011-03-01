@@ -1,5 +1,6 @@
 /*
- * Copyright © 2002 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright 2002 Lutz Müller <lutz@users.sourceforge.net>
+ * Copyright 2004-2010 Marcus Meissner <marcus@jet.franken.de>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,6 +44,7 @@
 #include <fcntl.h>
 #include <utime.h>
 #include <limits.h>
+#include <sys/time.h>
 
 #ifdef HAVE_POPT
 #  include <popt.h>
@@ -81,10 +83,11 @@
 #define __unused__
 #endif
 
-static int  glob_debug = -1;
+static int  debug_option_given = 0;
 char glob_cancel = 0;
 static int  glob_frames = 0;
 static int  glob_interval = 0;
+static int	glob_bulblength = 0;
 
 GPParams gp_params;
 
@@ -424,10 +427,22 @@ save_camera_file_to_file (
                 printf (_("Saving file as %s\n"), s);
 		fflush (stdout);
         }
+	path = s;
+	while ((path = strchr (path, gp_system_dir_delim))){
+		*path = '\0';
+		if(!gp_system_is_dir (s))
+			gp_system_mkdir (s);
+		*path++ = gp_system_dir_delim;
+	}
 	if (curname) {
+		int x;
+
 		unlink(s);
 		if (-1 == rename (curname, s))
 			perror("rename");
+		x = umask(0022); /* get umask */
+		umask(x);/* set it back to the old value */
+		chmod(s,0666 & ~x);
 	}
 	res = gp_file_get_mtime (file, &mtime);
         if ((res == GP_OK) && (mtime)) {
@@ -545,7 +560,7 @@ save_file_to_file (Camera *camera, GPContext *context, Flags flags,
  *         thumbnails according to thumbnail argument, and save to files.
  */
 
-static int
+int
 get_file_common (const char *arg, CameraFileType type )
 {
         gp_log (GP_LOG_DEBUG, "main", "Getting '%s'...", arg);
@@ -599,18 +614,137 @@ sig_handler_end_next (int sig_num)
         end_next = 1;
 }
 
+static long
+timediff_now (struct timeval *target) {
+	struct timeval now;
+
+	gettimeofday (&now, NULL);
+	return	(target->tv_sec-now.tv_sec)*1000+
+		(target->tv_usec-now.tv_usec)/1000;
+}
+
+static int
+save_captured_file (CameraFilePath *path, int download) {
+	char *pathsep;
+	static CameraFilePath last;
+	int result;
+
+	if (strcmp(path->folder, "/") == 0)
+		pathsep = "";
+	else
+		pathsep = "/";
+
+	if (gp_params.flags & FLAGS_QUIET) {
+		if (!(gp_params.flags & (FLAGS_STDOUT|FLAGS_STDOUT_SIZE)))
+			printf ("%s%s%s\n", path->folder, pathsep, path->name);
+	} else {
+		printf (_("New file is in location %s%s%s on the camera\n"),
+			path->folder, pathsep, path->name);
+	}
+	if (download) {
+		if (strcmp(path->folder, last.folder)) {
+			memcpy(&last, path, sizeof(last));
+
+			result = set_folder_action(&gp_params, path->folder);
+			if (result != GP_OK) {
+				cli_error_print(_("Could not set folder."));
+				return (result);
+			}
+		}
+
+		result = get_file_common (path->name, GP_FILE_TYPE_NORMAL);
+		if (result != GP_OK) {
+			cli_error_print (_("Could not get image."));
+			if(result == GP_ERROR_FILE_NOT_FOUND) {
+				/* Buggy libcanon.so?
+				 * Can happen if this was the first capture after a
+				 * CF card format, or during a directory roll-over,
+				 * ie: CANON100 -> CANON101
+				 */
+				cli_error_print ( _("Buggy libcanon.so?"));
+			}
+			return (result);
+		}
+
+		if (!(gp_params.flags & FLAGS_QUIET))
+			printf (_("Deleting file %s%s%s on the camera\n"),
+				path->folder, pathsep, path->name);
+
+		result = delete_file_action (&gp_params, path->name);
+		if (result != GP_OK) {
+			cli_error_print ( _("Could not delete image."));
+			return (result);
+		}
+	}
+	return GP_OK;
+}
+
+static int
+wait_and_handle_event (long waittime, CameraEventType *type, int download) {
+	int 		result;
+	CameraEventType	evtype;
+	void		*data;
+	CameraFilePath	*path;
+
+	if (!type) type = &evtype;
+	data = NULL;
+	evtype = GP_EVENT_UNKNOWN;
+	result = gp_camera_wait_for_event(gp_params.camera, waittime, type, &data, gp_params.context);
+	if (result == GP_ERROR_NOT_SUPPORTED) {
+		*type = GP_EVENT_TIMEOUT;
+		usleep(waittime*1000);
+		return GP_OK;
+	}
+	if (result != GP_OK)
+		return result;
+	path = data;
+	switch (*type) {
+	case GP_EVENT_TIMEOUT:
+		break;
+	case GP_EVENT_CAPTURE_COMPLETE:
+		break;
+	case GP_EVENT_FOLDER_ADDED:
+		if (!(gp_params.flags & FLAGS_QUIET))
+			printf (_("Event FOLDER_ADDED %s/%s during wait, ignoring.\n"), path->folder, path->name);
+		free (data);
+		break;
+	case GP_EVENT_FILE_ADDED:
+		result = save_captured_file (path, download);
+		free (data);
+		/* result will fall through to final return */
+		break;
+	case GP_EVENT_UNKNOWN:
+#if 0 /* too much spam for the common usage */
+		printf (_("Event UNKNOWN %s during wait, ignoring.\n"), (char*)data);
+#endif
+		free (data);
+		break;
+	default:
+		if (!(gp_params.flags & FLAGS_QUIET))
+			printf (_("Unknown event type %d during bulb wait, ignoring.\n"), *type);
+		break;
+	}
+	return result;
+}
+
 int
 capture_generic (CameraCaptureType type, const char __unused__ *name, int download)
 {
-	CameraFilePath path, last;
-	char *pathsep;
+	CameraFilePath path;
 	int result, frames = 0;
-	time_t next_pic_time, now;
-	int waittime;
+	CameraAbilities	a;
+	CameraEventType evtype;
+	long waittime;
+	struct timeval next_pic_time, expose_end_time;
 
-	next_pic_time = time (NULL) + glob_interval;
+	result = gp_camera_get_abilities (gp_params.camera, &a);
+	if (result != GP_OK) {
+		cli_error_print(_("Could not get capabilities?"));
+		return (result);
+	}
+	gettimeofday (&next_pic_time, NULL);
+	next_pic_time.tv_sec += glob_interval;
 	if(glob_interval) {
-		memset(&last, 0, sizeof(last));
 		if (!(gp_params.flags & FLAGS_QUIET)) {
 			if (glob_interval != -1)
 				printf (_("Time-lapse mode enabled (interval: %ds).\n"),
@@ -619,6 +753,14 @@ capture_generic (CameraCaptureType type, const char __unused__ *name, int downlo
 				printf (_("Standing by waiting for SIGUSR1 to capture.\n"));
 		}
 	}
+
+	if(glob_bulblength) {
+		if (!(gp_params.flags & FLAGS_QUIET)) {
+			printf (_("Bulb mode enabled (exposure time: %ds).\n"),
+				glob_bulblength);
+		}
+	}
+
 	capture_now = 0;
 	signal(SIGUSR1, sig_handler_capture_now);
 	end_next = 0;
@@ -634,93 +776,79 @@ capture_generic (CameraCaptureType type, const char __unused__ *name, int downlo
 
 		fflush(stdout);
 
-		result =  gp_camera_capture (gp_params.camera, type, &path, gp_params.context);
-		if (result != GP_OK) {
-			cli_error_print(_("Could not capture."));
-			return (result);
-		}
-
-		/* If my Canon EOS 10D is set to auto-focus and it is unable to
-		 * get focus lock - it will return with *UNKNOWN* as the filename.
-		 */
-		if (glob_interval && strcmp(path.name, "*UNKNOWN*") == 0) {
-			if (!(gp_params.flags & FLAGS_QUIET)) {
-				printf (_("Capture failed (auto-focus problem?)...\n"));
-				sleep(1);
-				continue;
+		/* Now handle the different capture methods */
+		if(glob_bulblength) {
+			/* Bulb mode is special ... we enable it, wait disable it */
+			result = set_config_action (&gp_params, "bulb", "1");
+			if (result != GP_OK) {
+				cli_error_print(_("Could not set bulb capture, result %d."), result);
+				return (result);
 			}
-		}
-
-		if (strcmp(path.folder, "/") == 0)
-			pathsep = "";
-		else
-			pathsep = "/";
-
-		if (gp_params.flags & FLAGS_QUIET)
-			printf ("%s%s%s\n", path.folder, pathsep, path.name);
-		else
-			printf (_("New file is in location %s%s%s on the camera\n"),
-				path.folder, pathsep, path.name);
-
-		if (download) {
-			if (strcmp(path.folder, last.folder)) {
-				memcpy(&last, &path, sizeof(last));
-
-				result = set_folder_action(&gp_params, path.folder);
+			gettimeofday (&expose_end_time, NULL);
+			expose_end_time.tv_sec += glob_bulblength;
+			waittime = timediff_now (&expose_end_time);
+			while (waittime > 0) {
+				result = wait_and_handle_event(waittime, &evtype, download);
+				if (result != GP_OK)
+					return result;
+				waittime = timediff_now (&expose_end_time);
+			}
+			result = set_config_action (&gp_params, "bulb", "0");
+			if (result != GP_OK) {
+				cli_error_print(_("Could not end capture (bulb mode)."));
+				return (result);
+			}
+			/* The actual download will happen down below in the interval wait
+			 * or the loop exit.
+			 */
+		} else {
+			result = GP_ERROR_NOT_SUPPORTED;
+#if 0
+			if (a.operations & GP_OPERATION_TRIGGER_CAPTURE) {
+				result = gp_camera_trigger_capture (gp_params.camera, gp_params.context);
 				if (result != GP_OK) {
-					cli_error_print(_("Could not set folder."));
+					cli_error_print(_("Could not trigger image capture."));
 					return (result);
 				}
+				/* The downloads will be handled by wait_event */
 			}
-
-			result = get_file_common (path.name, GP_FILE_TYPE_NORMAL);
-			if (result != GP_OK) {
-				cli_error_print (_("Could not get image."));
-				if(result == GP_ERROR_FILE_NOT_FOUND) {
-					/* Buggy libcanon.so?
-					 * Can happen if this was the first capture after a
-					 * CF card format, or during a directory roll-over,
-					 * ie: CANON100 -> CANON101
-					 */
-					cli_error_print ( _("Buggy libcanon.so?"));
+#endif
+			if (result == GP_ERROR_NOT_SUPPORTED) {
+				result = gp_camera_capture (gp_params.camera, type, &path, gp_params.context);
+				if (result != GP_OK) {
+					cli_error_print(_("Could not capture image."));
+					return (result);
 				}
-				return (result);
+				/* If my Canon EOS 10D is set to auto-focus and it is unable to
+				 * get focus lock - it will return with *UNKNOWN* as the filename.
+				 */
+				if (glob_interval && strcmp(path.name, "*UNKNOWN*") == 0) {
+					if (!(gp_params.flags & FLAGS_QUIET)) {
+						printf (_("Capture failed (auto-focus problem?)...\n"));
+						sleep(1);
+						continue;
+					}
+				}
+				result = save_captured_file (&path, download);
+				if (result != GP_OK)
+					break;
 			}
-
-			if (!(gp_params.flags & FLAGS_QUIET))
-				printf (_("Deleting file %s%s%s on the camera\n"),
-					path.folder, pathsep, path.name);
-
-			result = delete_file_action (&gp_params, path.name);
 			if (result != GP_OK) {
-				cli_error_print ( _("Could not delete image."));
+				cli_error_print(_("Could not capture."));
 				return (result);
 			}
 		}
+
 		/* Break if we've reached the requested number of frames
 		 * to capture.
 		 */
 		if(!glob_interval) break;
 
 		if(glob_frames && frames == glob_frames) break;
-		
+
 		/* Break if we've been told to end before the next frame */
 		if(end_next) break;
 
-#if 0
-		/* Marcus Meissner: Before you enable this, try to fix the
-		 * camera driver first! camera_exit is NOT necessary for
-		 * 2 captures in a row!
-		 */
-
-		/* Without this, it seems that the second capture always fails.
-		 * That is probably obvious...  for me it was trial n' error.
-		 */
-		result = gp_camera_exit (gp_params.camera, gp_params.context);
-		if (result != GP_OK) {
-			cli_error_print (_("Could not close camera connection."));
-		}
-#endif
 		/*
 		 * Even if the interval is set to -1, it is better to take a
 		 * picture first to prepare the camera driver for faster
@@ -728,24 +856,41 @@ capture_generic (CameraCaptureType type, const char __unused__ *name, int downlo
 		 * [alesan]
 		 */
 		if (glob_interval != -1) {
-			waittime = next_pic_time - time (NULL);
+			waittime = timediff_now (&next_pic_time);
 			if (waittime > 0) {
-				int i;
 				if (!(gp_params.flags & FLAGS_QUIET) && glob_interval)
-					printf (_("Sleeping for %d second(s)...\n"), waittime);
+					printf (_("Waiting for next capture slot %ld seconds...\n"), waittime/1000);
 				/* We're not sure about sleep() semantics when catching a signal */
-				for (i=0; (!capture_now) && (i<waittime); i++)
-					sleep(1);
-				if (capture_now && !(gp_params.flags & FLAGS_QUIET) && glob_interval)
-					printf (_("Awakened by SIGUSR1...\n"));
+				do {
+					/* granularity in which we can receive signals is 200 */
+					if (waittime > 200) waittime = 200;
+					result = wait_and_handle_event (waittime, NULL, download);
+					if (result != GP_OK)
+						break;
+					if (capture_now && !(gp_params.flags & FLAGS_QUIET) && glob_interval) {
+						printf (_("Awakened by SIGUSR1...\n"));
+						break;
+					}
+					waittime = timediff_now (&next_pic_time);
+				} while (waittime > 0);
 			} else {
+				/* even though we have no time, we need to drain the queue to capture downloads to-do */
+				evtype = GP_EVENT_UNKNOWN;
+				while (evtype != GP_EVENT_TIMEOUT) {
+					result = wait_and_handle_event (1, &evtype, download);
+					if (result != GP_OK)
+						break;
+				}
+				if (result != GP_OK)
+					break;
 				if (!(gp_params.flags & FLAGS_QUIET) && glob_interval)
-					printf (_("not sleeping (%d seconds behind schedule)\n"), - waittime);
+					printf (_("not sleeping (%ld seconds behind schedule)\n"), -waittime/1000);
 			}
-			if (capture_now && (gp_params.flags & FLAGS_RESET_CAPTURE_INTERVAL))
-				next_pic_time = time(NULL) + glob_interval;
+			if (capture_now && (gp_params.flags & FLAGS_RESET_CAPTURE_INTERVAL)) {
+				gettimeofday (&next_pic_time, NULL);
+				next_pic_time.tv_sec += glob_interval;
+			}
 			else if (!capture_now) {
-				now = time(NULL) - glob_interval;
 				/*
 				 * In the case of a (huge) time-sync while gphoto is running,
 				 * gphoto could percieve an extremely large amount of time and
@@ -754,95 +899,39 @@ capture_generic (CameraCaptureType type, const char __unused__ *name, int downlo
 				 * [alesan]
 				 */
 				do {
-					next_pic_time += glob_interval;
-				} while (next_pic_time < now);
+					next_pic_time.tv_sec += glob_interval;
+				} while (timediff_now (&next_pic_time) < 0);
 			}
 			capture_now = 0;
 		} else {
 			/* wait indefinitely for SIGUSR1 */
 			do {
-				pause();
-			} while(!capture_now);
+				result = wait_and_handle_event (200, &evtype, download);
+			} while(!capture_now && (result == GP_OK));
+			if (result != GP_OK)
+				break;
 			capture_now = 0;
 			if (!(gp_params.flags & FLAGS_QUIET))
 				printf (_("Awakened by SIGUSR1...\n"));
 		}
 	}
+	/* The final capture will fall out of the loop into this case,
+	 * so make sure we wait a bit for the the camera to finish stuff.
+	 */
+	waittime = 100;
+	if (glob_frames || end_next || !glob_interval || glob_bulblength) waittime = 2000;
+	/* Drain the event queue at the end and download left over added images */
+	while (1) {
+		result = wait_and_handle_event(waittime, &evtype, download);
+		if ((result != GP_OK) || (evtype == GP_EVENT_TIMEOUT))
+			break;
+		if (evtype == GP_EVENT_CAPTURE_COMPLETE)
+			waittime = 100;
+	}
 
 	signal(SIGUSR1, SIG_DFL);
 	return (GP_OK);
 }
-
-static int
-capture_tethered (const char __unused__ *name)
-{
-	CameraFilePath last;
-	int result;
-        CameraEventType event;
-        CameraFilePath  *fn;
-        void    *data = NULL;
-
-	printf ( _("Waiting for events from camera. Press Ctrl-C to abort.\n"));
-
-	while (1) {
-		result = gp_camera_wait_for_event (gp_params.camera, 1000, &event, &data, gp_params.context);
-		if (result != GP_OK)
-			break;
-		switch (event) {
-		case GP_EVENT_UNKNOWN:
-			if (data) {
-				printf("UNKNOWN %s\n", (char*)data);
-			} else {
-				printf("UNKNOWN\n");
-			}
-			break;
-		case GP_EVENT_TIMEOUT:
-			/* just continue and wait for next one. */
-			break;
-		case GP_EVENT_FILE_ADDED:
-			fn = (CameraFilePath*)data;
-			printf( _("New file %s/%s, downloading...\n"),fn->folder, fn->name);
-
-			if(strcmp(fn->folder, last.folder)) {
-				strcpy(last.folder, fn->folder);
-				result = set_folder_action(&gp_params, fn->folder);
-				if (result != GP_OK) {
-					cli_error_print(_("Could not set folder."));
-					return (result);
-				}
-			}
-			result = get_file_common (fn->name, GP_FILE_TYPE_NORMAL);
-			if (result != GP_OK) {
-				cli_error_print (_("Could not get image."));
-				if(result == GP_ERROR_FILE_NOT_FOUND) {
-					/* Buggy libcanon.so?
-					 * Can happen if this was the first capture after a
-					 * CF card format, or during a directory roll-over,
-					 * ie: CANON100 -> CANON101
-					 */
-					cli_error_print ( _("Buggy libcanon.so?"));
-				}
-				return (result);
-			}
-
-			do {
-				result = delete_file_action (&gp_params, fn->name);
-			} while (result == GP_ERROR_CAMERA_BUSY);
-			if (result != GP_OK) {
-				cli_error_print ( _("Could not delete image."));
-				/* continue in tethered loop */
-			}
-			break;
-		case GP_EVENT_FOLDER_ADDED:
-			fn = (CameraFilePath*)data;
-			/*printf("FOLDERADDED %s %s\n",fn->name, fn->folder);*/
-			break;
-        	}
-		if (glob_cancel) break;
-	}
-        return GP_OK;
-}
-
 
 
 /* Set/init global variables                                    */
@@ -975,6 +1064,7 @@ typedef enum {
 	ARG_AUTO_DETECT,
 	ARG_CAPTURE_FRAMES,
 	ARG_CAPTURE_INTERVAL,
+	ARG_CAPTURE_BULB,
 	ARG_CAPTURE_IMAGE,
 	ARG_CAPTURE_IMAGE_AND_DOWNLOAD,
 	ARG_CAPTURE_MOVIE,
@@ -997,6 +1087,8 @@ typedef enum {
 	ARG_GET_AUDIO_DATA,
 	ARG_GET_CONFIG,
 	ARG_SET_CONFIG,
+	ARG_SET_CONFIG_INDEX,
+	ARG_SET_CONFIG_VALUE,
 	ARG_GET_FILE,
 	ARG_GET_METADATA,
 	ARG_GET_RAW_DATA,
@@ -1203,6 +1295,9 @@ cb_arg_init (poptContext __unused__ ctx,
 	case ARG_CAPTURE_INTERVAL:
 		glob_interval = atoi(arg);
 		break;
+	case ARG_CAPTURE_BULB:
+		glob_bulblength = atoi(arg);
+		break;
 
 	case ARG_VERSION:
 		params->p.r = print_version_action (&gp_params);
@@ -1240,16 +1335,13 @@ cb_arg_run (poptContext __unused__ ctx,
 		params->p.r = capture_generic (GP_CAPTURE_IMAGE, arg, 1);
 		break;
 	case ARG_CAPTURE_MOVIE:
-		params->p.r = capture_generic (GP_CAPTURE_MOVIE, arg, 0);
+		params->p.r = action_camera_capture_movie (&gp_params, arg);
 		break;
 	case ARG_CAPTURE_PREVIEW:
 		params->p.r = action_camera_capture_preview (&gp_params);
 		break;
 	case ARG_CAPTURE_SOUND:
 		params->p.r = capture_generic (GP_CAPTURE_SOUND, arg, 0);
-		break;
-	case ARG_CAPTURE_TETHERED:
-		params->p.r = capture_tethered (arg);
 		break;
 	case ARG_CONFIG:
 #ifdef HAVE_CDK
@@ -1389,9 +1481,60 @@ cb_arg_run (poptContext __unused__ ctx,
 		free (name);
 		break;
 	}
-	case ARG_WAIT_EVENT:
-		params->p.r = action_camera_wait_event (&gp_params);
+	case ARG_SET_CONFIG_INDEX: {
+		char *name, *value;
+
+		if (strchr (arg, '=') == NULL) {
+			params->p.r = GP_ERROR_BAD_PARAMETERS;
+			break;
+		}
+		name  = strdup (arg);
+		value = strchr (name, '=');
+		*value = '\0';
+		value++;
+		params->p.r = set_config_index_action (&gp_params, name, value);
+		free (name);
 		break;
+	}
+	case ARG_SET_CONFIG_VALUE: {
+		char *name, *value;
+
+		if (strchr (arg, '=') == NULL) {
+			params->p.r = GP_ERROR_BAD_PARAMETERS;
+			break;
+		}
+		name  = strdup (arg);
+		value = strchr (name, '=');
+		*value = '\0';
+		value++;
+		params->p.r = set_config_value_action (&gp_params, name, value);
+		free (name);
+		break;
+	}
+	case ARG_WAIT_EVENT:
+	case ARG_CAPTURE_TETHERED: {
+		int count = 1000000/*events*/;
+		if (!arg) {
+			printf ( _("Waiting for events from camera. Press Ctrl-C to abort.\n"));
+		} else {
+			if (strchr(arg,'s')) { /* exact seconds */ 
+				count=-atoi(arg);
+				printf ( _("Waiting for %d seconds for events from camera. Press Ctrl-C to abort.\n"), -count);
+			} else {
+				count=atoi(arg);
+				printf ( _("Waiting for %d events from camera. Press Ctrl-C to abort.\n"), count);
+			}
+		}
+		switch (opt->val) {
+		case ARG_WAIT_EVENT:
+			params->p.r = action_camera_wait_event (&gp_params, 0, count);
+			break;
+		case ARG_CAPTURE_TETHERED:
+			params->p.r = action_camera_wait_event (&gp_params, 1, count);
+			break;
+		}
+		break;
+	}
 	case ARG_STORAGE_INFO:
 		params->p.r = print_storage_info (&gp_params);
 		break;
@@ -1447,10 +1590,13 @@ report_failure (int result, int argc, char **argv)
 		fprintf (stderr, _("Operation cancelled.\n"));
 		return;
 	}
-
-	fprintf (stderr, _("*** Error (%i: '%s') ***       \n\n"), result,
-		gp_result_as_string (result));
-	if (glob_debug == -1) {
+	if (result == -2000) {
+		fprintf (stderr, _("*** Error: No camera found. ***\n\n"));
+	} else {
+		fprintf (stderr, _("*** Error (%i: '%s') ***       \n\n"), result,
+			gp_result_as_string (result));
+	}
+	if (!debug_option_given) {
 		int n;
 		printf (_("For debugging messages, please use "
 			  "the --debug option.\n"
@@ -1490,6 +1636,7 @@ report_failure (int result, int argc, char **argv)
 			gp_params_run_hook(&gp_params, "stop", NULL);	\
 									\
 			gp_params_exit (&gp_params);			\
+                	poptFreeContext(ctx);				\
 			return (EXIT_FAILURE);				\
 		}							\
 	} while (0)
@@ -1534,7 +1681,6 @@ main (int argc, char **argv, char **envp)
 {
 	CallbackParams cb_params;
 	poptContext ctx;
-	int debug_option_given = 0;
 	int help_option_given = 0;
 	int usage_option_given = 0;
 	char *debug_logfile_name = NULL;
@@ -1558,7 +1704,7 @@ main (int argc, char **argv, char **envp)
 	const struct poptOption cameraOptions[] = {
 		GPHOTO2_POPT_CALLBACK
 		{"port", '\0', POPT_ARG_STRING, NULL, ARG_PORT,
-		 N_("Specify port device"), N_("FILENAME")},
+		 N_("Specify device port"), N_("FILENAME")},
 		{"speed", '\0', POPT_ARG_INT, NULL, ARG_SPEED,
 		 N_("Specify serial transfer speed"), N_("SPEED")},
 		{"camera", '\0', POPT_ARG_STRING, NULL, ARG_MODEL,
@@ -1590,16 +1736,24 @@ main (int argc, char **argv, char **envp)
 		{"get-config", '\0', POPT_ARG_STRING, NULL, ARG_GET_CONFIG,
 		 N_("Get configuration value"), NULL},
 		{"set-config", '\0', POPT_ARG_STRING, NULL, ARG_SET_CONFIG,
+		 N_("Set configuration value or index in choices"), NULL},
+		{"set-config-index", '\0', POPT_ARG_STRING, NULL, ARG_SET_CONFIG_INDEX,
+		 N_("Set configuration value index in choices"), NULL},
+		{"set-config-value", '\0', POPT_ARG_STRING, NULL, ARG_SET_CONFIG_VALUE,
 		 N_("Set configuration value"), NULL},
 		POPT_TABLEEND
 	};
 	const struct poptOption captureOptions[] = {
 		GPHOTO2_POPT_CALLBACK
-		{"wait-event", '\0', POPT_ARG_NONE, NULL, ARG_WAIT_EVENT,
-		 N_("Wait for event from camera"), NULL},
+		{"wait-event", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, NULL, ARG_WAIT_EVENT,
+		 N_("Wait for event(s) from camera"), N_("COUNT")},
+		{"wait-event-and-download", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, NULL,
+		 ARG_CAPTURE_TETHERED, N_("Wait for event(s) from the camera and download new images"), N_("COUNT")},
 		{"capture-preview", '\0', POPT_ARG_NONE, NULL,
 		 ARG_CAPTURE_PREVIEW,
 		 N_("Capture a quick preview"), NULL},
+		{"bulb", 'B', POPT_ARG_INT, NULL, ARG_CAPTURE_BULB,
+		 N_("Set bulb exposure time in seconds"), N_("SECONDS")},
 		{"frames", 'F', POPT_ARG_INT, NULL, ARG_CAPTURE_FRAMES,
 		 N_("Set number of frames to capture (default=infinite)"), N_("COUNT")},
 		{"interval", 'I', POPT_ARG_INT, NULL, ARG_CAPTURE_INTERVAL,
@@ -1610,12 +1764,12 @@ main (int argc, char **argv, char **envp)
 		 ARG_CAPTURE_IMAGE, N_("Capture an image"), NULL},
 		{"capture-image-and-download", '\0', POPT_ARG_NONE, NULL,
 		 ARG_CAPTURE_IMAGE_AND_DOWNLOAD, N_("Capture an image and download it"), NULL},
-		{"capture-movie", '\0', POPT_ARG_NONE, NULL,
-		 ARG_CAPTURE_MOVIE, N_("Capture a movie"), NULL},
+		{"capture-movie", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, NULL,
+		 ARG_CAPTURE_MOVIE, N_("Capture a movie"), N_("COUNT or SECONDS")},
 		{"capture-sound", '\0', POPT_ARG_NONE, NULL,
 		 ARG_CAPTURE_SOUND, N_("Capture an audio clip"), NULL},
-		{"capture-tethered", '\0', POPT_ARG_NONE, NULL,
-		 ARG_CAPTURE_TETHERED, N_("Wait for shutter release on the camera and download"), NULL},
+		{"capture-tethered", '\0', POPT_ARG_STRING|POPT_ARGFLAG_OPTIONAL, NULL,
+		 ARG_CAPTURE_TETHERED, N_("Wait for shutter release on the camera and download"), N_("COUNT")},
 		POPT_TABLEEND
 	};
 	const struct poptOption fileOptions[] = {
@@ -1662,7 +1816,7 @@ main (int argc, char **argv, char **envp)
 		{"delete-all-files", 'D', POPT_ARG_NONE, NULL,
 		 ARG_DELETE_ALL_FILES, N_("Delete all files in folder"), NULL},
 		{"upload-file", 'u', POPT_ARG_STRING, NULL, ARG_UPLOAD_FILE,
-		 N_("Upload a file to camera"), N_("filename")},
+		 N_("Upload a file to camera"), N_("FILENAME")},
 		{"filename", '\0', POPT_ARG_STRING, NULL, ARG_FILENAME,
 		 N_("Specify a filename or filename pattern"), N_("FILENAME_PATTERN")},
 		{"folder", 'f', POPT_ARG_STRING, NULL, ARG_FOLDER,
@@ -1832,6 +1986,7 @@ main (int argc, char **argv, char **envp)
 	cb_params.p.q.found = 0;
 	CHECK_OPT (ARG_ABILITIES);
 	CHECK_OPT (ARG_CAPTURE_IMAGE);
+	CHECK_OPT (ARG_CAPTURE_IMAGE_AND_DOWNLOAD);
 	CHECK_OPT (ARG_CAPTURE_MOVIE);
 	CHECK_OPT (ARG_CAPTURE_PREVIEW);
 	CHECK_OPT (ARG_CAPTURE_SOUND);
@@ -1844,21 +1999,28 @@ main (int argc, char **argv, char **envp)
 	CHECK_OPT (ARG_GET_ALL_RAW_DATA);
 	CHECK_OPT (ARG_GET_ALL_THUMBNAILS);
 	CHECK_OPT (ARG_GET_AUDIO_DATA);
+	CHECK_OPT (ARG_GET_CONFIG);
 	CHECK_OPT (ARG_GET_FILE);
 	CHECK_OPT (ARG_GET_RAW_DATA);
 	CHECK_OPT (ARG_GET_THUMBNAIL);
+	CHECK_OPT (ARG_LIST_CONFIG);
 	CHECK_OPT (ARG_LIST_FILES);
 	CHECK_OPT (ARG_LIST_FOLDERS);
 	CHECK_OPT (ARG_MANUAL);
 	CHECK_OPT (ARG_MKDIR);
 	CHECK_OPT (ARG_NUM_FILES);
 	CHECK_OPT (ARG_RMDIR);
+	CHECK_OPT (ARG_SET_CONFIG);
+	CHECK_OPT (ARG_SET_CONFIG_INDEX);
+	CHECK_OPT (ARG_SET_CONFIG_VALUE);
 	CHECK_OPT (ARG_SHELL);
 	CHECK_OPT (ARG_SHOW_EXIF);
 	CHECK_OPT (ARG_SHOW_INFO);
+	CHECK_OPT (ARG_STORAGE_INFO);
 	CHECK_OPT (ARG_SUMMARY);
 	CHECK_OPT (ARG_UPLOAD_FILE);
-	CHECK_OPT (ARG_STORAGE_INFO);
+	CHECK_OPT (ARG_UPLOAD_METADATA);
+	CHECK_OPT (ARG_WAIT_EVENT);
 	if (cb_params.p.q.found &&
 	    (!strcmp (a.model, "") || (info.type == GP_PORT_NONE))) {
 		int count;
@@ -1906,6 +2068,7 @@ main (int argc, char **argv, char **envp)
 			CR_MAIN (action_camera_set_port (&gp_params, path));
 
                 } else if (!count) {
+			int ret;
 			/*
 			 * No camera detected. Have a look at the settings.
 			 * Ignore errors here, it might be a serial one.
@@ -1914,7 +2077,12 @@ main (int argc, char **argv, char **envp)
 				action_camera_set_model (&gp_params, buf);
 			if (gp_setting_get ("gphoto2", "port", buf) >= 0)
 				action_camera_set_port (&gp_params, buf);
-
+			ret = gp_camera_init (gp_params.camera, gp_params.context);
+			if (ret != GP_OK) {
+				if (ret == GP_ERROR_BAD_PARAMETERS)
+					ret = -2000;
+				CR_MAIN (ret);
+			}
 		} else {
 			/* If --port override, search the model with the same port. */
 			if (info.type != GP_PORT_NONE) {

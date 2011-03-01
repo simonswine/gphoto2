@@ -1,3 +1,58 @@
+2010-01-24  Marcus Meissner  <marcus@jet.franken.de>
+
+	* actions.c: report CAPTURECOMPLETE event
+	* actions.c: check for read/only widgets early and report it
+	* shell.c: add capture-preview to shell mode.
+
+2009-12-06  Leonhard Zachl
+
+	* main.c: Added automatic subdir creation to --filename code.
+
+2009-09-30  Jonathan McIlnay-Moe <jmacmoe@gmail.com>
+
+	* main.c: Added a "bulb" option for capture.
+
+	  --capture-image-and-download -B 5  ... 
+	  --capture-image-and-download --bulb 5  ...
+
+	  It requires a camera with "bulb" support (currently
+          newer EOS cameras only).
+
+2009-07-23  Marcus Meissner  <marcus@jet.franken.de>
+
+	* shell.c,action.c,main.c:
+	  --capture-tethered ported to be just --wait-event + downloading
+
+          New --wait-event-and-download commandline option.
+
+	  --capture-tethered and --wait-event-and-download take optional
+	  counts or seconds, default is infinite waiting.
+
+	  Added 3 new shell commands:
+	  wait-event=x			(just like wait-event cmdline option, default 1)
+	  capture-tethered=x		(just like capture-tethered cmdline option, default 1)
+	  wait-event-and-download=x	(just like wait-event-and-download cmdline option, default 1)
+
+2009-06-21  Marcus Meissner  <marcus@jet.franken.de>
+
+	* main.c,action.c,shell.c: 
+	  Added seperate --set-config-index and --set-config-value functions
+	  for menu choice settings.
+
+	* main.c: Save files with current umask, not 0600.
+	* configure.ac: Build with large file support to allow saving files > 2GB.
+
+2009-04-10  Marcus Meissner  <marcus@jet.franken.de>
+
+	* main.c: --wait-event=x now can wait for "x" events,
+	  or 1 second timeouts. (so longest wait time will be "x" seconds).
+
+2009-04-07  Marcus Meissner  <marcus@jet.franken.de>
+
+	* actions.c: ctrl-c can abort tethered capture now
+	* main.c, gp-params.c: Make --quiet disable the progress bar too,
+	  and reduce --stdout --quiet capture output.
+
 2008-08-28  Marcus Meissner  <marcus@jet.franken.de>
 
 	* gphoto2/main.c: Allow to specify a camera by port.
