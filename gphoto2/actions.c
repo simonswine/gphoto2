@@ -30,6 +30,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <fcntl.h>
 #include <stdlib.h>
 
 #include <time.h>
@@ -259,7 +260,7 @@ print_info_action (GPParams *p, const char *filename)
 		if (info.file.fields & GP_FILE_INFO_TYPE)
 			printf (_("  Mime type:   '%s'\n"), info.file.type);
 		if (info.file.fields & GP_FILE_INFO_SIZE)
-			printf (_("  Size:        %li byte(s)\n"), info.file.size);
+			printf (_("  Size:        %lu byte(s)\n"), (unsigned long int)info.file.size);
 		if (info.file.fields & GP_FILE_INFO_WIDTH)
 			printf (_("  Width:       %i pixel(s)\n"), info.file.width);
 		if (info.file.fields & GP_FILE_INFO_HEIGHT)
@@ -291,7 +292,7 @@ print_info_action (GPParams *p, const char *filename)
 		if (info.preview.fields & GP_FILE_INFO_TYPE)
 			printf (_("  Mime type:   '%s'\n"), info.preview.type);
 		if (info.preview.fields & GP_FILE_INFO_SIZE)
-			printf (_("  Size:        %li byte(s)\n"), info.preview.size);
+			printf (_("  Size:        %lu byte(s)\n"), (unsigned long int)info.preview.size);
 		if (info.preview.fields & GP_FILE_INFO_WIDTH)
 			printf (_("  Width:       %i pixel(s)\n"), info.preview.width);
 		if (info.preview.fields & GP_FILE_INFO_HEIGHT)
@@ -307,7 +308,7 @@ print_info_action (GPParams *p, const char *filename)
 		if (info.audio.fields & GP_FILE_INFO_TYPE)
 			printf (_("  Mime type:  '%s'\n"), info.audio.type);
 		if (info.audio.fields & GP_FILE_INFO_SIZE)
-			printf (_("  Size:       %li byte(s)\n"), info.audio.size);
+			printf (_("  Size:       %lu byte(s)\n"), (unsigned long int)info.audio.size);
 		if (info.audio.fields & GP_FILE_INFO_STATUS)
 			printf (_("  Downloaded: %s\n"),
 				(info.audio.status == GP_FILE_STATUS_DOWNLOADED) ? _("yes") : _("no"));
@@ -346,7 +347,7 @@ print_file_action (GPParams *p, const char *filename)
 			       (info.file.permissions & GP_FILE_PERM_DELETE) ? "d" : "-");
 		    }
 		    if (info.file.fields & GP_FILE_INFO_SIZE)
-			printf(" %5ld KB", (info.file.size+1023) / 1024);
+			printf(" %5ld KB", (unsigned long int)((info.file.size+1023) / 1024));
 		    if ((info.file.fields & GP_FILE_INFO_WIDTH) && +
 			    (info.file.fields & GP_FILE_INFO_HEIGHT))
 			printf(" %4dx%-4d", info.file.width, info.file.height);
@@ -829,11 +830,8 @@ action_camera_set_speed (GPParams *p, unsigned int speed)
 		}
 		return (GP_ERROR_BAD_PARAMETERS);
 	}
-
 	/* Set the speed. */
-	CR (gp_camera_set_port_speed (p->camera, speed));
-
-	return (GP_OK);
+	return gp_camera_set_port_speed (p->camera, speed);
 }
 
 int
@@ -891,7 +889,7 @@ print_version_action (GPParams __unused__ *p)
 		  "\n"
 		  "This version of gphoto2 is using the following software versions and options:\n"),
 		VERSION,
-		2008, /* year of release! */
+		2010, /* year of release! */
 		port_message
 		);
 
@@ -947,6 +945,8 @@ action_camera_capture_preview (GPParams *p)
 #endif
 	if (r < 0) {
 		gp_file_unref (file);
+		if (fd != -1)
+			unlink (tmpname);
 		return (r);
 	}
 
@@ -958,36 +958,176 @@ action_camera_capture_preview (GPParams *p)
 	return (GP_OK);
 }
 
+enum moviemode { MOVIE_ENDLESS, MOVIE_FRAMES, MOVIE_SECONDS };
+
 int
-action_camera_wait_event (GPParams *p)
+action_camera_capture_movie (GPParams *p, const char *arg)
+{
+	CameraFile	*file;
+	int		r;
+	int		fd;
+	time_t		st;
+	enum moviemode	mm;
+	int		frames;
+	char		*xname;
+
+	if (p->flags & FLAGS_STDOUT) {
+		fd = dup(fileno(stdout));
+		xname = "stdout";
+	} else {
+		fd = open("movie.mjpg",O_WRONLY|O_CREAT,0660);
+		if (fd == -1) {
+			cli_error_print(_("Could not open 'movie.mjpg'."));
+			return GP_ERROR;
+		}
+		xname = "movie.mjpg";
+	}
+	if (!arg) {
+		mm = MOVIE_ENDLESS;
+		fprintf(stderr,_("Capturing preview frames as movie to '%s'. Press Ctrl-C to abort.\n"), xname);
+	} else {
+		if (strchr(arg,'s')) {
+			sscanf (arg, "%ds", &frames);
+			fprintf(stderr,_("Capturing preview frames as movie to '%s' for %d seconds.\n"), xname, frames);
+			mm = MOVIE_SECONDS;
+			time (&st);
+		} else {
+			sscanf (arg, "%d", &frames);
+			fprintf(stderr,_("Capturing %d preview frames as movie to '%s'.\n"), frames, xname);
+			mm = MOVIE_FRAMES;
+		}
+	}
+	CR (gp_file_new_from_fd (&file, fd));
+	while (1) {
+		const char *mime;
+		r = gp_camera_capture_preview (p->camera, file, p->context);
+		if (r < 0) {
+			cli_error_print(_("Movie capture error... Exiting."));
+			break;
+		}
+		gp_file_get_mime_type (file, &mime);
+                if (strcmp (mime, GP_MIME_JPEG)) {
+			cli_error_print(_("Movie capture error... Unhandled MIME type '%s'."), mime);
+			break;
+		}
+
+		if (glob_cancel) {
+			fprintf(stderr, _("Ctrl-C pressed ... Exiting.\n"));
+			break;
+		}
+		if (mm == MOVIE_FRAMES) {
+			if (!frames--)
+				break;
+		}
+		if (mm == MOVIE_SECONDS) {
+			time_t	xt;
+			time (&xt);
+			if (xt >= st + frames)
+				break;
+		}
+	}
+	gp_file_unref (file);
+	return (GP_OK);
+}
+
+/* count < 0 means exact seconds timer.
+ * count > 0 means number of events (with 1 second timeout events).
+ */
+int
+action_camera_wait_event (GPParams *p, int dodownload, int count)
 {
 	int ret;
 	CameraEventType	event;
 	void	*data = NULL;
 	CameraFilePath	*fn;
+	CameraFilePath last;
+	struct timeval	xtime;
 
-	ret = gp_camera_wait_for_event (p->camera, 10000, &event, &data, p->context);
-	if (ret != GP_OK)
-		return ret;
-	switch (event) {
-	case GP_EVENT_UNKNOWN:
-		if (data) {
-			printf("UNKNOWN %s\n", (char*)data);
-		} else {
-			printf("UNKNOWN\n");
+	gettimeofday (&xtime, NULL);
+	memset(&last,0,sizeof(last));
+
+	if (!count) count = 1;
+	while (1) {
+		int 		leftoverms = 1000;
+		struct timeval	ytime;
+		int		x;
+
+		if (glob_cancel) break;
+		if (!count) break;
+		if (count > 0) count--;
+
+		if (count < 0) { /* in exact seconds */
+			gettimeofday (&ytime, NULL);
+
+			x = (ytime.tv_usec-xtime.tv_usec)+(ytime.tv_sec-xtime.tv_sec)*1000000;
+			if (x > (-count*1000000)) break;
+			/* if left over time is < 1s, set it... otherwise wait at most 1s */
+			if ((-(count*1000000)-x) < leftoverms*1000)
+				leftoverms = (-(count*1000000)-x)/1000;
 		}
-		break;
-	case GP_EVENT_TIMEOUT:
-		printf("TIMEOUT\n");
-		break;
-	case GP_EVENT_FILE_ADDED:
-		fn = (CameraFilePath*)data;
-		printf("FILEADDED %s %s\n",fn->name, fn->folder);
-		break;
-	case GP_EVENT_FOLDER_ADDED:
-		fn = (CameraFilePath*)data;
-		printf("FOLDERADDED %s %s\n",fn->name, fn->folder);
-		break;
+
+		data = NULL;
+		ret = gp_camera_wait_for_event (p->camera, leftoverms, &event, &data, p->context);
+		if (ret != GP_OK)
+			return ret;
+		switch (event) {
+		case GP_EVENT_UNKNOWN:
+			if (data) {
+				printf("UNKNOWN %s\n", (char*)data);
+			} else {
+				printf("UNKNOWN\n");
+			}
+			break;
+		case GP_EVENT_TIMEOUT:
+			/*printf("TIMEOUT\n");*/
+			break;
+		case GP_EVENT_CAPTURE_COMPLETE:
+			printf("CAPTURECOMPLETE\n");
+			break;
+		case GP_EVENT_FILE_ADDED:
+			fn = (CameraFilePath*)data;
+
+			if (!dodownload) {
+				printf("FILEADDED %s %s\n",fn->name, fn->folder);
+				continue;
+			}
+			/* Otherwise download the image and continue... */
+			if(strcmp(fn->folder, last.folder)) {
+				strcpy(last.folder, fn->folder);
+				ret = set_folder_action(p, fn->folder);
+				if (ret != GP_OK) {
+					cli_error_print(_("Could not set folder."));
+					return (ret);
+				}
+			}
+			ret = get_file_common (fn->name, GP_FILE_TYPE_NORMAL);
+			if (ret != GP_OK) {
+				cli_error_print (_("Could not get image."));
+				if(ret == GP_ERROR_FILE_NOT_FOUND) {
+					/* Buggy libcanon.so?
+					* Can happen if this was the first capture after a
+					* CF card format, or during a directory roll-over,
+					* ie: CANON100 -> CANON101
+					*/
+					cli_error_print ( _("Buggy libcanon.so?"));
+				}
+				return (ret);
+			}
+
+			do {
+				ret = delete_file_action (p, fn->name);
+			} while (ret == GP_ERROR_CAMERA_BUSY);
+			if (ret != GP_OK) {
+				cli_error_print ( _("Could not delete image."));
+				/* dont continue in event loop */
+			}
+			break;
+		case GP_EVENT_FOLDER_ADDED:
+			fn = (CameraFilePath*)data;
+			printf("FOLDERADDED %s %s\n",fn->name, fn->folder);
+			break;
+		}
+		free (data);
 	}
 	return GP_OK;
 }
@@ -1072,11 +1212,11 @@ print_storage_info (GPParams *p)
 			printf("\n");
 		}
 		if (sinfos[i].fields & GP_STORAGEINFO_MAXCAPACITY)
-			printf ("totalcapacity=%ld KB\n", sinfos[i].capacitykbytes);
+			printf ("totalcapacity=%lu KB\n", (unsigned long)sinfos[i].capacitykbytes);
 		if (sinfos[i].fields & GP_STORAGEINFO_FREESPACEKBYTES)
-			printf ("free=%ld KB\n", sinfos[i].freekbytes);
+			printf ("free=%lu KB\n", (unsigned long)sinfos[i].freekbytes);
 		if (sinfos[i].fields & GP_STORAGEINFO_FREESPACEIMAGES)
-			printf ("freeimages=%ld\n", sinfos[i].freeimages);
+			printf ("freeimages=%lu\n", (unsigned long)sinfos[i].freeimages);
 	}
 	return GP_OK;
 }
@@ -1450,6 +1590,172 @@ get_config_action (GPParams *p, const char *name) {
 int
 set_config_action (GPParams *p, const char *name, const char *value) {
 	CameraWidget *rootconfig,*child;
+	int	ret, ro;
+	CameraWidgetType	type;
+
+	ret = _find_widget_by_name (p, name, &child, &rootconfig);
+	if (ret != GP_OK)
+		return ret;
+
+	ret = gp_widget_get_readonly (child, &ro);
+	if (ret != GP_OK) {
+		gp_widget_free (rootconfig);
+		return ret;
+	}
+	if (ro == 1) {
+		gp_context_error (p->context, _("Property %s is read only."), name);
+		gp_widget_free (rootconfig);
+		return GP_ERROR;
+	}
+	ret = gp_widget_get_type (child, &type);
+	if (ret != GP_OK) {
+		gp_widget_free (rootconfig);
+		return ret;
+	}
+
+	switch (type) {
+	case GP_WIDGET_TEXT: {		/* char *		*/
+		ret = gp_widget_set_value (child, value);
+		if (ret != GP_OK)
+			gp_context_error (p->context, _("Failed to set the value of text widget %s to %s."), name, value);
+		break;
+	}
+	case GP_WIDGET_RANGE: {	/* float		*/
+		float	f,t,b,s;
+
+		ret = gp_widget_get_range (child, &b, &t, &s);
+		if (ret != GP_OK)
+			break;
+		if (!sscanf (value, "%f", &f)) {
+			gp_context_error (p->context, _("The passed value %s is not a floating point value."), value);
+			ret = GP_ERROR_BAD_PARAMETERS;
+			break;
+		}
+		if ((f < b) || (f > t)) {
+			gp_context_error (p->context, _("The passed value %f is not within the expected range %f - %f."), f, b, t);
+			ret = GP_ERROR_BAD_PARAMETERS;
+			break;
+		}
+		ret = gp_widget_set_value (child, &f);
+		if (ret != GP_OK)
+			gp_context_error (p->context, _("Failed to set the value of range widget %s to %f."), name, f);
+		break;
+	}
+	case GP_WIDGET_TOGGLE: {	/* int		*/
+		int	t;
+
+		t = 2;
+		if (	!strcasecmp (value, "off")	|| !strcasecmp (value, "no")	||
+			!strcasecmp (value, "false")	|| !strcmp (value, "0")		||
+			!strcasecmp (value, _("off"))	|| !strcasecmp (value, _("no"))	||
+			!strcasecmp (value, _("false"))
+		)
+			t = 0;
+		if (	!strcasecmp (value, "on")	|| !strcasecmp (value, "yes")	||
+			!strcasecmp (value, "true")	|| !strcmp (value, "1")		||
+			!strcasecmp (value, _("on"))	|| !strcasecmp (value, _("yes"))	||
+			!strcasecmp (value, _("true"))
+		)
+			t = 1;
+		/*fprintf (stderr," value %s, t %d\n", value, t);*/
+		if (t == 2) {
+			gp_context_error (p->context, _("The passed value %s is not a valid toggle value."), value);
+			ret = GP_ERROR_BAD_PARAMETERS;
+			break;
+		}
+		ret = gp_widget_set_value (child, &t);
+		if (ret != GP_OK)
+			gp_context_error (p->context, _("Failed to set values %s of toggle widget %s."), value, name);
+		break;
+	}
+	case GP_WIDGET_DATE:  {		/* int			*/
+		int	t = -1;
+		struct tm xtm;
+
+#ifdef HAVE_STRPTIME
+		if (strptime (value, "%c", &xtm) || strptime (value, "%Ec", &xtm))
+			t = mktime (&xtm);
+#endif
+		if (t == -1) {
+			if (!sscanf (value, "%d", &t)) {
+				gp_context_error (p->context, _("The passed value %s is neither a valid time nor an integer."), value);
+				ret = GP_ERROR_BAD_PARAMETERS;
+				break;
+			}
+		}
+		ret = gp_widget_set_value (child, &t);
+		if (ret != GP_OK)
+			gp_context_error (p->context, _("Failed to set new time of date/time widget %s to %s."), name, value);
+		break;
+	}
+	case GP_WIDGET_MENU:
+	case GP_WIDGET_RADIO: { /* char *		*/
+		int cnt, i;
+		char *endptr;
+
+		cnt = gp_widget_count_choices (child);
+		if (cnt < GP_OK) {
+			ret = cnt;
+			break;
+		}
+		ret = GP_ERROR_BAD_PARAMETERS;
+		for ( i=0; i<cnt; i++) {
+			const char *choice;
+
+			ret = gp_widget_get_choice (child, i, &choice);
+			if (ret != GP_OK)
+				continue;
+			if (!strcmp (choice, value)) {
+				ret = gp_widget_set_value (child, value);
+				break;
+			}
+		}
+		if (i != cnt)
+			break;
+
+		/* make sure we parse just 1 integer, and there is nothing more. 
+		 * sscanf just does not provide this, we need strtol.
+		 */
+		i = strtol (value, &endptr, 10);
+		if ((value != endptr) && (*endptr == '\0')) {
+			if ((i>= 0) && (i < cnt)) {
+				const char *choice;
+
+				ret = gp_widget_get_choice (child, i, &choice);
+				if (ret == GP_OK)
+					ret = gp_widget_set_value (child, choice);
+				break;
+			}
+		}
+		/* Lets just try setting the value directly, in case we have flexible setters,
+		 * like PTP shutterspeed. */
+		ret = gp_widget_set_value (child, value);
+		if (ret == GP_OK)
+			break;
+		gp_context_error (p->context, _("Choice %s not found within list of choices."), value);
+		break;
+	}
+
+	/* ignore: */
+	case GP_WIDGET_WINDOW:
+	case GP_WIDGET_SECTION:
+	case GP_WIDGET_BUTTON:
+		gp_context_error (p->context, _("The %s widget is not configurable."), name);
+		ret = GP_ERROR_BAD_PARAMETERS;
+		break;
+	}
+	if (ret == GP_OK) {
+		ret = gp_camera_set_config (p->camera, rootconfig, p->context);
+		if (ret != GP_OK)
+			gp_context_error (p->context, _("Failed to set new configuration value %s for configuration entry %s."), value, name);
+	}
+	gp_widget_free (rootconfig);
+	return (ret);
+}
+
+int
+set_config_index_action (GPParams *p, const char *name, const char *value) {
+	CameraWidget *rootconfig,*child;
 	int	ret;
 	const char *label;
 	CameraWidgetType	type;
@@ -1464,6 +1770,69 @@ set_config_action (GPParams *p, const char *name, const char *value) {
 		return ret;
 	}
 	ret = gp_widget_get_label (child, &label);
+	if (ret != GP_OK) {
+		gp_widget_free (rootconfig);
+		return ret;
+	}
+
+	switch (type) {
+	case GP_WIDGET_MENU:
+	case GP_WIDGET_RADIO: { /* char *		*/
+		int cnt, i;
+
+		cnt = gp_widget_count_choices (child);
+		if (cnt < GP_OK) {
+			ret = cnt;
+			break;
+		}
+		ret = GP_ERROR_BAD_PARAMETERS;
+		if (sscanf (value, "%d", &i)) {
+			if ((i>= 0) && (i < cnt)) {
+				const char *choice;
+
+				ret = gp_widget_get_choice (child, i, &choice);
+				if (ret == GP_OK)
+					ret = gp_widget_set_value (child, choice);
+				break;
+			}
+		}
+		gp_context_error (p->context, _("Choice %s not found within list of choices."), value);
+		break;
+	}
+
+	/* ignore: */
+	case GP_WIDGET_TOGGLE:
+	case GP_WIDGET_TEXT:
+	case GP_WIDGET_RANGE:
+	case GP_WIDGET_DATE: 
+	case GP_WIDGET_WINDOW:
+	case GP_WIDGET_SECTION:
+	case GP_WIDGET_BUTTON:
+		gp_context_error (p->context, _("The %s widget has no indexed list of choices. Use --set-config-value instead."), name);
+		ret = GP_ERROR_BAD_PARAMETERS;
+		break;
+	}
+	if (ret == GP_OK) {
+		ret = gp_camera_set_config (p->camera, rootconfig, p->context);
+		if (ret != GP_OK)
+			gp_context_error (p->context, _("Failed to set new configuration value %s for configuration entry %s."), value, name);
+	}
+	gp_widget_free (rootconfig);
+	return (ret);
+}
+
+
+int
+set_config_value_action (GPParams *p, const char *name, const char *value) {
+	CameraWidget *rootconfig,*child;
+	int	ret;
+	CameraWidgetType	type;
+
+	ret = _find_widget_by_name (p, name, &child, &rootconfig);
+	if (ret != GP_OK)
+		return ret;
+
+	ret = gp_widget_get_type (child, &type);
 	if (ret != GP_OK) {
 		gp_widget_free (rootconfig);
 		return ret;
@@ -1567,17 +1936,10 @@ set_config_action (GPParams *p, const char *name, const char *value) {
 		}
 		if (i != cnt)
 			break;
-
-		if (sscanf (value, "%d", &i)) {
-			if ((i>= 0) && (i < cnt)) {
-				const char *choice;
-
-				ret = gp_widget_get_choice (child, i, &choice);
-				if (ret == GP_OK)
-					ret = gp_widget_set_value (child, choice);
-				break;
-			}
-		}
+		/* Lets just try setting the value directly, in case we have flexible setters,
+		 * like PTP shutterspeed. */
+		ret = gp_widget_set_value (child, value);
+		if (ret == GP_OK) break;
 		gp_context_error (p->context, _("Choice %s not found within list of choices."), value);
 		break;
 	}
