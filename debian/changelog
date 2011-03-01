@@ -1,3 +1,25 @@
+gphoto2 (2.4.10-2) UNRELEASED; urgency=low
+
+  * Removing KiBi from Uploaders, as requested. Thanks for all your
+    previous work!
+
+ -- David Paleino <dapal@debian.org>  Mon, 03 Jan 2011 01:44:20 +0100
+
+gphoto2 (2.4.10-1) experimental; urgency=low
+
+  * New upstream version
+  * Added myself to Uploaders
+  * Use "3.0 (quilt)" source format, drop all quilt machinery
+  * Use overrides to minimize debian/rules even more
+  * Bump Standards-Version to 3.9.1, no changes needed
+  * Drop usage of type-handling -- use architecture wildcard instead
+  * debian/patches/01-handle_EACCES.patch refreshed
+  * debian/patches/20_german_translation removed, merged upstream
+  * Bump requirement on libgphoto2-2 to >= 2.4.10
+  * Remove duplicated Section field
+
+ -- David Paleino <dapal@debian.org>  Sun, 14 Nov 2010 19:26:33 +0100
+
 gphoto2 (2.4.5-3) unstable; urgency=low
 
   * Warn and exit with an error if files couldn't be written to
