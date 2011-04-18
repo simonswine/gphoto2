@@ -1,23 +1,26 @@
 # translation of gphoto2-2.1.6rc1.po to Danish
 # Danish translation of gPhoto
 # Copyright (C) 2000, 2005 Free Software Foundation, Inc.
+# This file is distributed under the same license as the gphoto2 package.
 # Andreas Hyden <a.hyden@cyberpoint.se> 2000.
 # Stefan Bjørnelund <stefanb@update.uu.se> 2002.
 # Sverker Wiberg <sverkerw@du.uab.ericsson.se> 2002.
-# Keld Simonsen <keld@dkuug.dk>, 2003, 2005.
-#
+# Daniel Nylander <po@danielnylander.se>, 2009, 2010.
+# Keld Simonsen <keld@keldix.com>, 2003,2005,2011
 msgid ""
 msgstr ""
-"Project-Id-Version: gphoto2-2.1.6rc1\n"
+"Project-Id-Version: gphoto2-2.4.10\n"
 "Report-Msgid-Bugs-To: gphoto-devel@lists.sourceforge.net\n"
-"POT-Creation-Date: 2010-08-15 15:12+0200\n"
-"PO-Revision-Date: 2005-07-30 01:08+0200\n"
-"Last-Translator: Keld Simonsen <keld@dkuug.dk>\n"
-"Language-Team: Danish <dansk@klid.dk>\n"
+"POT-Creation-Date: 2011-04-17 19:42+0200\n"
+"PO-Revision-Date: 2011-01-11 01:18+0100\n"
+"Last-Translator: Keld Simonsen <keld@keldix.com>\n"
+"Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
+"Language: da\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: KBabel 1.0.2\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: gphoto2/actions.c:168
 #, c-format
@@ -25,23 +28,23 @@ msgid "Number of files in folder '%s': %i\n"
 msgstr "Antal filer i mappen '%s': %i\n"
 
 #: gphoto2/actions.c:188
-#, fuzzy, c-format
+#, c-format
 msgid "There is %d folder in folder '%s'.\n"
 msgid_plural "There are %d folders in folder '%s'.\n"
-msgstr[0] "Der findes én mappe i mappen '%s':"
-msgstr[1] "Der findes én mappe i mappen '%s':"
+msgstr[0] "Der findes %d mappe i mappen '%s':\n"
+msgstr[1] "Der findes %d mapper i mappen '%s':\n"
 
 #: gphoto2/actions.c:228
-#, fuzzy, c-format
+#, c-format
 msgid "There is no file in folder '%s'.\n"
-msgstr "Der findes en fil i mappen '%s':"
+msgstr "Der findes ingen filer i mappen '%s':\n"
 
 #: gphoto2/actions.c:231
-#, fuzzy, c-format
+#, c-format
 msgid "There is %d file in folder '%s'.\n"
 msgid_plural "There are %d files in folder '%s'.\n"
-msgstr[0] "Der findes en fil i mappen '%s':"
-msgstr[1] "Der findes en fil i mappen '%s':"
+msgstr[0] "Der findes %d fil i mappen '%s':\n"
+msgstr[1] "Der findes %d filer i mappen '%s':\n"
 
 #: gphoto2/actions.c:252
 #, c-format
@@ -69,9 +72,9 @@ msgid "  Mime type:   '%s'\n"
 msgstr "  Mime-type:    '%s'\n"
 
 #: gphoto2/actions.c:263 gphoto2/actions.c:295
-#, fuzzy, c-format
+#, c-format
 msgid "  Size:        %lu byte(s)\n"
-msgstr "  Størrelse:     %li byte\n"
+msgstr "  Størrelse:     %lu byte\n"
 
 #: gphoto2/actions.c:265 gphoto2/actions.c:297
 #, c-format
@@ -148,9 +151,9 @@ msgid "  Mime type:  '%s'\n"
 msgstr "  Mime-type:   '%s'\n"
 
 #: gphoto2/actions.c:311
-#, fuzzy, c-format
+#, c-format
 msgid "  Size:       %lu byte(s)\n"
-msgstr "  Størrelse:    %li byte(s)\n"
+msgstr "  Størrelse:    %lu byte\n"
 
 #: gphoto2/actions.c:313
 #, c-format
@@ -196,17 +199,17 @@ msgstr "Understøttede kameraer:\n"
 #: gphoto2/actions.c:560
 #, c-format
 msgid "\t\"%s\" (TESTING)\n"
-msgstr "\t\"%s\" (TESTER)\n"
+msgstr "\t'%s' (TESTER)\n"
 
 #: gphoto2/actions.c:563
 #, c-format
 msgid "\t\"%s\" (EXPERIMENTAL)\n"
-msgstr "\t\"%s\" (EKSPERIMENTEL)\n"
+msgstr "\t'%s' (EKSPERIMENTEL)\n"
 
 #: gphoto2/actions.c:568
 #, c-format
 msgid "\t\"%s\"\n"
-msgstr "\t\"%s\"\n"
+msgstr "\t'%s'\n"
 
 #: gphoto2/actions.c:612
 #, c-format
@@ -303,14 +306,14 @@ msgid "Configuration support            : %s\n"
 msgstr "Konfigurationsunderstøttelse               :%s\n"
 
 #: gphoto2/actions.c:695
-#, fuzzy, c-format
+#, c-format
 msgid "Delete selected files on camera  : %s\n"
-msgstr "Understøttelse for sletning af filer på kamera: %s\n"
+msgstr "Slet valgte filer på kamera      : %s\n"
 
 #: gphoto2/actions.c:698
-#, fuzzy, c-format
+#, c-format
 msgid "Delete all files on camera       : %s\n"
-msgstr "Understøttelse for sletning af filer på kamera: %s\n"
+msgstr "Slet alle filer på kamera        : %s\n"
 
 #: gphoto2/actions.c:701
 #, c-format
@@ -367,7 +370,7 @@ msgid "OS/2 port by Bart van Leeuwen\n"
 msgstr "OS/2-portering af Bart van Leeuwen\n"
 
 #: gphoto2/actions.c:881
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "gphoto2 %s\n"
 "\n"
@@ -383,129 +386,130 @@ msgid ""
 msgstr ""
 "gphoto2 %s\n"
 "\n"
-"Copyright © 2000-2004 Lutz Mueller og andre\n"
+"Copyright © 2000-%d Lutz Mueller og andre\n"
 "%s\n"
 "gphoto2 kommer UDEN GARANTI, så vidt som lov tillader. Du må\n"
 "videredistribuere kopier af gphoto2 under betingelserne i GNU General "
 "Public\n"
 "License. For yderligere information, se filerne med navnet COPYING.\n"
 "\n"
-"Denne version af gphoto2 bruger følgende programmelversioner og tilvalg:\n"
+"Denne version af gphoto2 bruger følgende programversioner og tilvalg:\n"
 
 #: gphoto2/actions.c:980
-#, fuzzy
 msgid "Could not open 'movie.mjpg'."
-msgstr "Kunne ikke finde billede."
+msgstr "Kunne ikke åbne 'movie.mjpg'."
 
 #: gphoto2/actions.c:987
 #, c-format
 msgid "Capturing preview frames as movie to '%s'. Press Ctrl-C to abort.\n"
 msgstr ""
+"Optager forhåndsvisningsrammer som film til '%s'. Tryk Ctrl-C for at "
+"afbryde.\n"
 
 #: gphoto2/actions.c:991
 #, c-format
 msgid "Capturing preview frames as movie to '%s' for %d seconds.\n"
-msgstr ""
+msgstr "Optager forhåndsvisningsrammer som film til '%s' i %d sekunder.\n"
 
 #: gphoto2/actions.c:996
 #, c-format
 msgid "Capturing %d preview frames as movie to '%s'.\n"
-msgstr ""
+msgstr "Optager %d forhåndsvisningsrammer som film til '%s'.\n"
 
 #: gphoto2/actions.c:1005
 msgid "Movie capture error... Exiting."
-msgstr ""
+msgstr "Fejl ved filmoptagelse...Afslutter."
 
 #: gphoto2/actions.c:1010
 #, c-format
 msgid "Movie capture error... Unhandled MIME type '%s'."
-msgstr ""
+msgstr "Fejl ved filmoptagelse... Uhåndteret MIME-type '%s'"
 
 #: gphoto2/actions.c:1015
 #, c-format
 msgid "Ctrl-C pressed ... Exiting.\n"
-msgstr ""
+msgstr "Ctrl-C trykket... Afslutter.\n"
 
-#: gphoto2/actions.c:1099 gphoto2/main.c:650
+#: gphoto2/actions.c:1099 gphoto2/main.c:641
 msgid "Could not set folder."
 msgstr "Kunne ikke sætte mappe."
 
-#: gphoto2/actions.c:1105 gphoto2/main.c:657
+#: gphoto2/actions.c:1105 gphoto2/main.c:648
 msgid "Could not get image."
 msgstr "Kunne ikke finde billede."
 
-#: gphoto2/actions.c:1112 gphoto2/main.c:664
+#: gphoto2/actions.c:1112 gphoto2/main.c:655
 msgid "Buggy libcanon.so?"
 msgstr "Fejlbehæftet libcanon.so?"
 
-#: gphoto2/actions.c:1121 gphoto2/main.c:675
+#: gphoto2/actions.c:1121 gphoto2/main.c:666
 msgid "Could not delete image."
 msgstr "Kunne ikke slette billede."
 
 #: gphoto2/actions.c:1144
 #, c-format
 msgid "Getting storage information not supported for this camera.\n"
-msgstr ""
+msgstr "Hentning af lagringsinformation understøttes ikke for dette kamera.\n"
 
 #: gphoto2/actions.c:1159
 #, c-format
 msgid "Read-Write"
-msgstr ""
+msgstr "Læs-skriv"
 
 #: gphoto2/actions.c:1162
 #, c-format
 msgid "Read-Only"
-msgstr ""
+msgstr "Skrivebeskyttet"
 
 #: gphoto2/actions.c:1165
 #, c-format
 msgid "Read-only with delete"
-msgstr ""
+msgstr "Skrivebeskyttet med sletning"
 
 #: gphoto2/actions.c:1168 gphoto2/actions.c:1178
 #, c-format
 msgid "Unknown"
-msgstr ""
+msgstr "Ukendt"
 
 #: gphoto2/actions.c:1181
 #, c-format
 msgid "Fixed ROM"
-msgstr ""
+msgstr "Fast ROM"
 
 #: gphoto2/actions.c:1184
 #, c-format
 msgid "Removable ROM"
-msgstr ""
+msgstr "Flytbar ROM"
 
 #: gphoto2/actions.c:1187
 #, c-format
 msgid "Fixed RAM"
-msgstr ""
+msgstr "Fast RAM"
 
 #: gphoto2/actions.c:1190
 #, c-format
 msgid "Removable RAM"
-msgstr ""
+msgstr "Flytbar RAM"
 
 #: gphoto2/actions.c:1200
 #, c-format
 msgid "Undefined"
-msgstr ""
+msgstr "Udefineret"
 
 #: gphoto2/actions.c:1203
 #, c-format
 msgid "Generic Flat"
-msgstr ""
+msgstr "Generelt fladt"
 
 #: gphoto2/actions.c:1206
 #, c-format
 msgid "Generic Hierarchical"
-msgstr ""
+msgstr "Generelt hierarkisk"
 
 #: gphoto2/actions.c:1209
 #, c-format
 msgid "Camera layout (DCIM)"
-msgstr ""
+msgstr "Kameralayout (DCIM)"
 
 #: gphoto2/actions.c:1247
 #, c-format
@@ -517,7 +521,7 @@ msgid ""
 "ALWAYS INCLUDE THE FOLLOWING LINES WHEN SENDING DEBUG MESSAGES TO THE "
 "MAILING LIST:"
 msgstr ""
-"INKLUDÉR ALTID DE FØLGENDE LINJER NÆR DU SENDER FEJLSØGNINGSBESKEDER TIL "
+"INKLUDÉR ALTID DE FØLGENDE LINJER NÅR DU SENDER FEJLSØGNINGSBESKEDER TIL "
 "POSTLISTEN:"
 
 #: gphoto2/actions.c:1326
@@ -558,7 +562,7 @@ msgstr "Kunne ikke få fat på værdier for radio-felt %s."
 #: gphoto2/actions.c:1606
 #, c-format
 msgid "Property %s is read only."
-msgstr ""
+msgstr "Egenskaben %s er skrivebeskyttet."
 
 #: gphoto2/actions.c:1620 gphoto2/actions.c:1845
 #, c-format
@@ -638,6 +642,8 @@ msgstr ""
 msgid ""
 "The %s widget has no indexed list of choices. Use --set-config-value instead."
 msgstr ""
+"Widgetten %s har ingen indekseret liste over valg. Brug --set-config-value i "
+"stedet."
 
 #: gphoto2/foreach.c:254
 #, c-format
@@ -658,8 +664,8 @@ msgstr "Der findes ingen filer i mappen '%s'."
 #: gphoto2/foreach.c:285
 #, c-format
 msgid ""
-"Bad file number. You specified %i, but there is only 1 file available in '%"
-"s'."
+"Bad file number. You specified %i, but there is only 1 file available in "
+"'%s'."
 msgstr ""
 "Fejlagtigt filnummer. Du specificerede %i, men der er kun 1 fil tilgængelig "
 "i '%s'."
@@ -733,156 +739,153 @@ msgstr "Ja"
 msgid "No"
 msgstr "Nej"
 
-#: gphoto2/main.c:235
+#: gphoto2/main.c:236
 #, c-format
 msgid "Zero padding numbers in file names is only possible with %%n."
-msgstr ""
+msgstr "Udfyldning med nuller i filnavne er kun muligt med %%n."
 
-#: gphoto2/main.c:244
-#, fuzzy, c-format
-msgid "You cannot use %%n zero padding without a precision value!"
-msgstr "Du kan ikke bruge '%%n' i kombination med ikke-bestandige filer!"
-
-#: gphoto2/main.c:260
+#: gphoto2/main.c:245
 #, c-format
-msgid "You cannot use '%%n' in combination with non-persistent files!"
-msgstr "Du kan ikke bruge '%%n' i kombination med ikke-bestandige filer!"
+msgid "You cannot use %%n zero padding without a precision value!"
+msgstr "Du kan ikke bruge %%n udfyldning med nuller uden en præcis værdi!"
 
-#: gphoto2/main.c:291
+#: gphoto2/main.c:278
 #, c-format
 msgid "The filename provided by the camera ('%s') does not contain a suffix!"
 msgstr "Filnavnet leveret af kameraet ('%s') indeholder ikke en endelse!"
 
-#: gphoto2/main.c:346
+#: gphoto2/main.c:333
 #, c-format
 msgid "Invalid format '%s' (error at position %i)."
 msgstr "Ugyldigt format '%s' (fejl i position %i)."
 
-#: gphoto2/main.c:399
+#: gphoto2/main.c:386
 #, c-format
 msgid "File %s exists. Overwrite? [y|n] "
 msgstr "Filen %s eksisterer. Overskriv? Ja/Nej [y|n] "
 
-#: gphoto2/main.c:411
+#: gphoto2/main.c:398
 #, c-format
 msgid "Specify new filename? [y|n] "
 msgstr "Specificér filnavn? Ja/Nej [y|n] "
 
-#: gphoto2/main.c:421
+#: gphoto2/main.c:408
 #, c-format
 msgid "Enter new filename: "
 msgstr "Indtast nyt filnavn: "
 
-#: gphoto2/main.c:427
+#: gphoto2/main.c:414
 #, c-format
 msgid "Saving file as %s\n"
 msgstr "Gem fil som %s\n"
 
-#: gphoto2/main.c:641
+#: gphoto2/main.c:507
+#, fuzzy
+msgid "Permission denied"
+msgstr "  Rettigheder: "
+
+#: gphoto2/main.c:632
 #, c-format
 msgid "New file is in location %s%s%s on the camera\n"
 msgstr "Ny fil er på stedet %s%s%s på kameraet\n"
 
-#: gphoto2/main.c:670
+#: gphoto2/main.c:661
 #, c-format
 msgid "Deleting file %s%s%s on the camera\n"
 msgstr "Sletter fil  %s%s%s på kameraet\n"
 
-#: gphoto2/main.c:708
+#: gphoto2/main.c:699
 #, c-format
 msgid "Event FOLDER_ADDED %s/%s during wait, ignoring.\n"
-msgstr ""
+msgstr "Hændelse FOLDER_ADDED %s/%s ved ventning, ignorerer.\n"
 
-#: gphoto2/main.c:718
+#: gphoto2/main.c:709
 #, c-format
 msgid "Event UNKNOWN %s during wait, ignoring.\n"
-msgstr ""
+msgstr "Hændelse UNKNOWN %s ved ventning, ignorerer.\n"
 
-#: gphoto2/main.c:724
+#: gphoto2/main.c:715
 #, c-format
 msgid "Unknown event type %d during bulb wait, ignoring.\n"
 msgstr ""
+"Ukendt hændelsestype %d ved ventning på langtidseksponering, ignorerer.\n"
 
-#: gphoto2/main.c:742
-#, fuzzy
+#: gphoto2/main.c:733
 msgid "Could not get capabilities?"
-msgstr "Kunne ikke finde billede."
+msgstr "Kunne ikke få fat på faciliteter?"
+
+#: gphoto2/main.c:741
+#, c-format
+msgid "Time-lapse mode enabled (interval: %ds).\n"
+msgstr "Tilstand for medgået tid aktiveret (interval: %ds).\n"
+
+#: gphoto2/main.c:744
+#, c-format
+msgid "Standing by waiting for SIGUSR1 to capture.\n"
+msgstr "Venter på SIGUSR1 for at optage.\n"
 
 #: gphoto2/main.c:750
 #, c-format
-msgid "Time-lapse mode enabled (interval: %ds).\n"
-msgstr "Medgået tids-tilstand aktiveret (interval: %ds).\n"
-
-#: gphoto2/main.c:753
-#, c-format
-msgid "Standing by waiting for SIGUSR1 to capture.\n"
-msgstr ""
-
-#: gphoto2/main.c:759
-#, fuzzy, c-format
 msgid "Bulb mode enabled (exposure time: %ds).\n"
-msgstr "Medgået tids-tilstand aktiveret (interval: %ds).\n"
+msgstr "Langtidseksponering aktiveret (eksponeringstid: %ds).\n"
 
-#: gphoto2/main.c:772
+#: gphoto2/main.c:763
 #, c-format
 msgid "Capturing frame #%d...\n"
 msgstr "Optager ramme #%d...\n"
 
-#: gphoto2/main.c:774
+#: gphoto2/main.c:765
 #, c-format
 msgid "Capturing frame #%d/%d...\n"
 msgstr "Optager ramme #%d/%d...\n"
 
-#: gphoto2/main.c:784
-#, fuzzy, c-format
+#: gphoto2/main.c:775
+#, c-format
 msgid "Could not set bulb capture, result %d."
-msgstr "Kunne ikke optage."
+msgstr "Kunne ikke sætte langtidseksponering, resultat %d."
 
-#: gphoto2/main.c:798
-#, fuzzy
+#: gphoto2/main.c:789
 msgid "Could not end capture (bulb mode)."
-msgstr "Kunne ikke optage."
+msgstr "Kunne ikke afslutte optagelse (langtidseksponering)."
+
+#: gphoto2/main.c:801
+msgid "Could not trigger image capture."
+msgstr "Kunne ikke udløse optagelse af billede."
 
 #: gphoto2/main.c:810
-#, fuzzy
-msgid "Could not trigger image capture."
-msgstr "Kunne ikke finde billede."
-
-#: gphoto2/main.c:819
-#, fuzzy
 msgid "Could not capture image."
-msgstr "Kunne ikke optage."
+msgstr "Kunne ikke optage billede."
 
-#: gphoto2/main.c:827
+#: gphoto2/main.c:818
 #, c-format
 msgid "Capture failed (auto-focus problem?)...\n"
 msgstr "Optagelse mislykkedes (autofokus-problem?)...\n"
 
-#: gphoto2/main.c:837
+#: gphoto2/main.c:828
 msgid "Could not capture."
 msgstr "Kunne ikke optage."
 
-#: gphoto2/main.c:862
+#: gphoto2/main.c:853
 #, c-format
 msgid "Waiting for next capture slot %ld seconds...\n"
-msgstr ""
+msgstr "venter på næste optagegelsestidspunkt %ld sekunder...\n"
 
-#: gphoto2/main.c:871 gphoto2/main.c:915
+#: gphoto2/main.c:862 gphoto2/main.c:906
 #, c-format
 msgid "Awakened by SIGUSR1...\n"
-msgstr ""
+msgstr "Vækket af SIGUSR1...\n"
 
-#: gphoto2/main.c:887
+#: gphoto2/main.c:878
 #, c-format
 msgid "not sleeping (%ld seconds behind schedule)\n"
-msgstr ""
+msgstr "sover ikke (%ld sekunder bagefter planen)\n"
 
-#: gphoto2/main.c:1018
+#: gphoto2/main.c:1009
 #, c-format
 msgid "ERROR: "
 msgstr "FEJL:"
 
-#: gphoto2/main.c:1041
+#: gphoto2/main.c:1032
 #, c-format
 msgid ""
 "\n"
@@ -891,12 +894,12 @@ msgstr ""
 "\n"
 "Afbryder...\n"
 
-#: gphoto2/main.c:1047
+#: gphoto2/main.c:1038
 #, c-format
 msgid "Aborted.\n"
 msgstr "Afbrudt.\n"
 
-#: gphoto2/main.c:1052
+#: gphoto2/main.c:1043
 #, c-format
 msgid ""
 "\n"
@@ -905,7 +908,7 @@ msgstr ""
 "\n"
 "Annullerer...\n"
 
-#: gphoto2/main.c:1194
+#: gphoto2/main.c:1185
 #, c-format
 msgid ""
 "Use the following syntax a:b=c:d to treat any USB device detected as a:b as "
@@ -915,38 +918,41 @@ msgstr ""
 "som a:b som c:d i stedet. a b c d skal være hexadecimale tal som begynder "
 "med '0x'.\n"
 
-#: gphoto2/main.c:1351
+#: gphoto2/main.c:1342
 msgid "gphoto2 has been compiled without support for CDK."
 msgstr "gphoto2 er blevet oversat uden understøttelse for CDK."
 
-#: gphoto2/main.c:1518
+#: gphoto2/main.c:1509
 #, c-format
 msgid "Waiting for events from camera. Press Ctrl-C to abort.\n"
-msgstr ""
+msgstr "Venter på hændelser fra kamera. Tryk Ctrl-C for at afbryde.\n"
 
-#: gphoto2/main.c:1522
+#: gphoto2/main.c:1513
 #, c-format
 msgid "Waiting for %d seconds for events from camera. Press Ctrl-C to abort.\n"
 msgstr ""
+"Venter i %d sekunder på hændelser fra kamera. Tryk Ctrl-C for at afbryde.\n"
 
-#: gphoto2/main.c:1525
+#: gphoto2/main.c:1516
 #, c-format
 msgid "Waiting for %d events from camera. Press Ctrl-C to abort.\n"
-msgstr ""
+msgstr "Venter på %d hændelser fra kamera. Tryk Ctrl-C for at afbryde.\n"
 
-#: gphoto2/main.c:1590
+#: gphoto2/main.c:1581
 #, c-format
 msgid "Operation cancelled.\n"
 msgstr "Operationen annulleret.\n"
 
-#: gphoto2/main.c:1594
+#: gphoto2/main.c:1585
 #, c-format
 msgid ""
 "*** Error: No camera found. ***\n"
 "\n"
 msgstr ""
+"*** Fejl: Intet kamera fundet. ***\n"
+"\n"
 
-#: gphoto2/main.c:1596
+#: gphoto2/main.c:1587
 #, c-format
 msgid ""
 "*** Error (%i: '%s') ***       \n"
@@ -955,7 +961,7 @@ msgstr ""
 "***  Fejl  (%i: '%s') ***       \n"
 "\n"
 
-#: gphoto2/main.c:1601
+#: gphoto2/main.c:1592
 #, c-format
 msgid ""
 "For debugging messages, please use the --debug option.\n"
@@ -971,362 +977,348 @@ msgstr ""
 "udviklernes postliste <gphoto-devel@lists.sourceforge.net>, så kør venligst\n"
 "gphoto2 som følger:\n"
 
-#: gphoto2/main.c:1690
+#: gphoto2/main.c:1681
 msgid "Print complete help message on program usage"
-msgstr ""
+msgstr "Udskriv komplet hjælpemeddelelse om brug"
 
-#: gphoto2/main.c:1692
+#: gphoto2/main.c:1683
 msgid "Print short message on program usage"
-msgstr ""
+msgstr "Udskriv kort meddelelse om brug"
 
-#: gphoto2/main.c:1694
+#: gphoto2/main.c:1685
 msgid "Turn on debugging"
 msgstr "Aktivér fejlsøgning"
 
-#: gphoto2/main.c:1696
+#: gphoto2/main.c:1687
 msgid "Name of file to write debug info to"
-msgstr ""
+msgstr "Navn på fil at skrive fejlsøgningsinformation til"
 
-#: gphoto2/main.c:1696 gphoto2/main.c:1701 gphoto2/main.c:1707
-#: gphoto2/main.c:1819
+#: gphoto2/main.c:1687 gphoto2/main.c:1692 gphoto2/main.c:1698
+#: gphoto2/main.c:1810
 msgid "FILENAME"
-msgstr ""
+msgstr "FILNAVN"
 
-#: gphoto2/main.c:1698
+#: gphoto2/main.c:1689
 msgid "Quiet output (default=verbose)"
 msgstr "Stille uddata (standard=snaksalig)"
 
-#: gphoto2/main.c:1700
+#: gphoto2/main.c:1691
 msgid "Hook script to call after downloads, captures, etc."
-msgstr ""
+msgstr "Hook-skript at kalde efter hentninger, optagelser, osv."
 
-#: gphoto2/main.c:1707
-#, fuzzy
+#: gphoto2/main.c:1698
 msgid "Specify device port"
 msgstr "Specificér portenhed"
 
-#: gphoto2/main.c:1709
+#: gphoto2/main.c:1700
 msgid "Specify serial transfer speed"
 msgstr "Specificér overføringshastighed"
 
-#: gphoto2/main.c:1709
+#: gphoto2/main.c:1700
 msgid "SPEED"
-msgstr ""
+msgstr "GASTIGHED"
 
-#: gphoto2/main.c:1711
+#: gphoto2/main.c:1702
 msgid "Specify camera model"
 msgstr "Specificér kamera-model"
 
-#: gphoto2/main.c:1711
+#: gphoto2/main.c:1702
 msgid "MODEL"
-msgstr ""
+msgstr "MODEL"
 
-#: gphoto2/main.c:1713
+#: gphoto2/main.c:1704
 msgid "(expert only) Override USB IDs"
 msgstr "(kun for eksperter) tilsidesæt USB ID'er"
 
-#: gphoto2/main.c:1713
+#: gphoto2/main.c:1704
 msgid "USBIDs"
-msgstr ""
+msgstr "USBID'er"
 
-#: gphoto2/main.c:1719
+#: gphoto2/main.c:1710
 msgid "Display version and exit"
 msgstr "Vis version og afslut"
 
-#: gphoto2/main.c:1721
+#: gphoto2/main.c:1712
 msgid "List supported camera models"
 msgstr "Lister understøttede kamera-modeller"
 
-#: gphoto2/main.c:1723
+#: gphoto2/main.c:1714
 msgid "List supported port devices"
 msgstr "Lister understøttede portenheder"
 
-#: gphoto2/main.c:1725
-#, fuzzy
+#: gphoto2/main.c:1716
 msgid "Display camera/driver abilities"
-msgstr "Vis kamera-faciliteter"
+msgstr "Vis kamera/driver-faciliteter"
 
-#: gphoto2/main.c:1732
+#: gphoto2/main.c:1723
 msgid "Configure"
 msgstr "Konfigurér"
 
-#: gphoto2/main.c:1735
+#: gphoto2/main.c:1726
 msgid "List configuration tree"
 msgstr "Vís konfigurationstræ"
 
-#: gphoto2/main.c:1737
+#: gphoto2/main.c:1728
 msgid "Get configuration value"
 msgstr "Find konfigurationsværdi"
 
-#: gphoto2/main.c:1739
-#, fuzzy
+#: gphoto2/main.c:1730
 msgid "Set configuration value or index in choices"
-msgstr "Sæt konfigurationsværdi"
+msgstr "Sæt konfigurationsværdi eller indeks i valg"
 
-#: gphoto2/main.c:1741
-#, fuzzy
+#: gphoto2/main.c:1732
 msgid "Set configuration value index in choices"
-msgstr "Sæt konfigurationsværdi"
+msgstr "Sæt konfigurationsværdi af indeks i valg"
 
-#: gphoto2/main.c:1743
+#: gphoto2/main.c:1734
 msgid "Set configuration value"
 msgstr "Sæt konfigurationsværdi"
 
-#: gphoto2/main.c:1749
+#: gphoto2/main.c:1740
 msgid "Wait for event(s) from camera"
-msgstr ""
+msgstr "Vent på hændelser fra kamera"
 
-#: gphoto2/main.c:1749 gphoto2/main.c:1751 gphoto2/main.c:1758
-#: gphoto2/main.c:1772
+#: gphoto2/main.c:1740 gphoto2/main.c:1742 gphoto2/main.c:1749
+#: gphoto2/main.c:1763
 msgid "COUNT"
-msgstr ""
+msgstr "ANTAL"
 
-#: gphoto2/main.c:1751
+#: gphoto2/main.c:1742
 msgid "Wait for event(s) from the camera and download new images"
-msgstr ""
+msgstr "Vent på hændelser fra kameraet og hent nye billeder"
 
-#: gphoto2/main.c:1754
+#: gphoto2/main.c:1745
 msgid "Capture a quick preview"
-msgstr "Tag et hurtigt smugkig"
+msgstr "Optag et hurtigt smugkig"
 
-#: gphoto2/main.c:1756
-#, fuzzy
+#: gphoto2/main.c:1747
 msgid "Set bulb exposure time in seconds"
-msgstr "Sæt optagelsesinterval i sekunder"
+msgstr "Sæt langtidseksponeringstid i sekunder"
 
-#: gphoto2/main.c:1756 gphoto2/main.c:1760
+#: gphoto2/main.c:1747 gphoto2/main.c:1751
 msgid "SECONDS"
-msgstr ""
+msgstr "SEKUNDER"
 
-#: gphoto2/main.c:1758
+#: gphoto2/main.c:1749
 msgid "Set number of frames to capture (default=infinite)"
 msgstr "Sæt antal rammer der skal optages (standard=uendelig)"
 
-#: gphoto2/main.c:1760
+#: gphoto2/main.c:1751
 msgid "Set capture interval in seconds"
 msgstr "Sæt optagelsesinterval i sekunder"
 
-#: gphoto2/main.c:1762
-#, fuzzy
+#: gphoto2/main.c:1753
 msgid "Reset capture interval on signal (default=no)"
-msgstr "Sæt optagelsesinterval i sekunder"
+msgstr "Nulstil optageinterval ved signal (standard=nej)"
 
-#: gphoto2/main.c:1764
+#: gphoto2/main.c:1755
 msgid "Capture an image"
 msgstr "Tag et billede"
 
-#: gphoto2/main.c:1766
-#, fuzzy
+#: gphoto2/main.c:1757
 msgid "Capture an image and download it"
-msgstr "Tag et billede"
+msgstr "Tag et billede og hjemhent det"
 
-#: gphoto2/main.c:1768
+#: gphoto2/main.c:1759
 msgid "Capture a movie"
 msgstr "Optag en film"
 
-#: gphoto2/main.c:1768
+#: gphoto2/main.c:1759
 msgid "COUNT or SECONDS"
-msgstr ""
+msgstr "ANTAL eller SEKUNDER"
 
-#: gphoto2/main.c:1770
+#: gphoto2/main.c:1761
 msgid "Capture an audio clip"
-msgstr "Tag et lydafsnit"
+msgstr "Optag et lydafsnit"
 
-#: gphoto2/main.c:1772
+#: gphoto2/main.c:1763
 msgid "Wait for shutter release on the camera and download"
-msgstr ""
+msgstr "Vent på aftrykker på kameraet og hent"
 
-#: gphoto2/main.c:1778
+#: gphoto2/main.c:1769
 msgid "List folders in folder"
-msgstr "List mapper i mappen"
+msgstr "Vis mapper i mappen"
 
-#: gphoto2/main.c:1780
+#: gphoto2/main.c:1771
 msgid "List files in folder"
 msgstr "List filer i mappe"
 
-#: gphoto2/main.c:1782
+#: gphoto2/main.c:1773
 msgid "Create a directory"
 msgstr "Opret et katalog"
 
-#: gphoto2/main.c:1782 gphoto2/main.c:1784
+#: gphoto2/main.c:1773 gphoto2/main.c:1775
 msgid "DIRNAME"
-msgstr ""
+msgstr "KATNAVN"
 
-#: gphoto2/main.c:1784
+#: gphoto2/main.c:1775
 msgid "Remove a directory"
 msgstr "Fjern et katalog"
 
-#: gphoto2/main.c:1786
+#: gphoto2/main.c:1777
 msgid "Display number of files"
 msgstr "Vis antal filer"
 
-#: gphoto2/main.c:1788
+#: gphoto2/main.c:1779
 msgid "Get files given in range"
 msgstr "Hent filer givet i interval"
 
-#: gphoto2/main.c:1788 gphoto2/main.c:1792 gphoto2/main.c:1797
-#: gphoto2/main.c:1804 gphoto2/main.c:1810 gphoto2/main.c:1815
+#: gphoto2/main.c:1779 gphoto2/main.c:1783 gphoto2/main.c:1788
+#: gphoto2/main.c:1795 gphoto2/main.c:1801 gphoto2/main.c:1806
 msgid "RANGE"
-msgstr ""
+msgstr "INTERVAL"
 
-#: gphoto2/main.c:1790
+#: gphoto2/main.c:1781
 msgid "Get all files from folder"
 msgstr "Hent alle filer fra mappen"
 
-#: gphoto2/main.c:1792
+#: gphoto2/main.c:1783
 msgid "Get thumbnails given in range"
 msgstr "Hent alle miniaturer i det givne interval"
 
-#: gphoto2/main.c:1795
+#: gphoto2/main.c:1786
 msgid "Get all thumbnails from folder"
 msgstr "Hent alle miniaturer i mappen"
 
-#: gphoto2/main.c:1797
-#, fuzzy
+#: gphoto2/main.c:1788
 msgid "Get metadata given in range"
-msgstr "Hent rådata i det givne interval"
+msgstr "Hent metadata i det givne interval"
 
-#: gphoto2/main.c:1799
-#, fuzzy
+#: gphoto2/main.c:1790
 msgid "Get all metadata from folder"
-msgstr "Hent alle rådata fra mappen"
+msgstr "Hent alle metadata fra mappe"
 
-#: gphoto2/main.c:1801
+#: gphoto2/main.c:1792
 msgid "Upload metadata for file"
-msgstr ""
+msgstr "Oplæg metadata for fil"
 
-#: gphoto2/main.c:1804
+#: gphoto2/main.c:1795
 msgid "Get raw data given in range"
 msgstr "Hent rådata i det givne interval"
 
-#: gphoto2/main.c:1807
+#: gphoto2/main.c:1798
 msgid "Get all raw data from folder"
 msgstr "Hent alle rådata fra mappen"
 
-#: gphoto2/main.c:1810
+#: gphoto2/main.c:1801
 msgid "Get audio data given in range"
 msgstr "Hent lyddata i det givne interval"
 
-#: gphoto2/main.c:1813
+#: gphoto2/main.c:1804
 msgid "Get all audio data from folder"
 msgstr "Hent alle lyddata fra mappen"
 
-#: gphoto2/main.c:1815
+#: gphoto2/main.c:1806
 msgid "Delete files given in range"
 msgstr "Slet filer i det givne interval"
 
-#: gphoto2/main.c:1817
+#: gphoto2/main.c:1808
 msgid "Delete all files in folder"
 msgstr "Slet alle filer i mappen"
 
-#: gphoto2/main.c:1819
+#: gphoto2/main.c:1810
 msgid "Upload a file to camera"
 msgstr "Oplæg fil på kamera"
 
-#: gphoto2/main.c:1821
-#, fuzzy
+#: gphoto2/main.c:1812
 msgid "Specify a filename or filename pattern"
-msgstr "Specificér et filnavn"
+msgstr "Specificér et filnavn eller filnavnsmønster"
 
-#: gphoto2/main.c:1821
+#: gphoto2/main.c:1812
 msgid "FILENAME_PATTERN"
-msgstr ""
+msgstr "FILNAVNSMØNSTER"
 
-#: gphoto2/main.c:1823
+#: gphoto2/main.c:1814
 msgid "Specify camera folder (default=\"/\")"
-msgstr "Specificér kameramappe (standard=\"/\")"
+msgstr "Specificér kameramappe (standard='/')"
 
-#: gphoto2/main.c:1823
+#: gphoto2/main.c:1814
 msgid "FOLDER"
-msgstr ""
+msgstr "MAPPE"
 
-#: gphoto2/main.c:1825
+#: gphoto2/main.c:1816
 msgid "Recursion (default for download)"
 msgstr "Rekursion (standard for hjemhentning)"
 
-#: gphoto2/main.c:1827
+#: gphoto2/main.c:1818
 msgid "No recursion (default for deletion)"
 msgstr "Ej rekursion (standard for sletning)"
 
-#: gphoto2/main.c:1829
+#: gphoto2/main.c:1820
 msgid "Process new files only"
 msgstr "Behand kun nye filer"
 
-#: gphoto2/main.c:1831
+#: gphoto2/main.c:1822
 msgid "Overwrite files without asking"
 msgstr "Overskriv filer uden at spørge"
 
-#: gphoto2/main.c:1837
+#: gphoto2/main.c:1828
 msgid "Send file to stdout"
 msgstr "Send fil til stdout"
 
-#: gphoto2/main.c:1839
+#: gphoto2/main.c:1830
 msgid "Print filesize before data"
 msgstr "Skriv filstørrelse før data"
 
-#: gphoto2/main.c:1841
+#: gphoto2/main.c:1832
 msgid "List auto-detected cameras"
 msgstr "List autodetekterede kameraer"
 
-#: gphoto2/main.c:1845 gphoto2/shell.c:138
+#: gphoto2/main.c:1836 gphoto2/shell.c:138
 msgid "Show EXIF information"
 msgstr "Vis EXIF-information"
 
-#: gphoto2/main.c:1848 gphoto2/shell.c:132
+#: gphoto2/main.c:1839 gphoto2/shell.c:132
 msgid "Show info"
 msgstr "Vis info"
 
-#: gphoto2/main.c:1850
+#: gphoto2/main.c:1841
 msgid "Show summary"
 msgstr "Vis oversigt"
 
-#: gphoto2/main.c:1852
+#: gphoto2/main.c:1843
 msgid "Show camera driver manual"
 msgstr "Vis kameradrivrutinens manual"
 
-#: gphoto2/main.c:1854
+#: gphoto2/main.c:1845
 msgid "About the camera driver manual"
 msgstr "Om kameradrivrutinens manual"
 
-#: gphoto2/main.c:1856
-#, fuzzy
+#: gphoto2/main.c:1847
 msgid "Show storage information"
-msgstr "Vis EXIF-information"
+msgstr "Vis lager-information"
 
-#: gphoto2/main.c:1858
+#: gphoto2/main.c:1849
 msgid "gPhoto shell"
 msgstr "gPhoto skál"
 
-#: gphoto2/main.c:1864
+#: gphoto2/main.c:1855
 msgid "Common options"
-msgstr ""
+msgstr "Almindelige flag"
 
-#: gphoto2/main.c:1866
+#: gphoto2/main.c:1857
 msgid "Miscellaneous options (unsorted)"
-msgstr ""
+msgstr "Diverse flag (usorterede)"
 
-#: gphoto2/main.c:1868
+#: gphoto2/main.c:1859
 msgid "Get information on software and host system (not from the camera)"
-msgstr ""
+msgstr "Hent information om programmer og værtssystem (ikke fra kameraet)"
 
-#: gphoto2/main.c:1870
-#, fuzzy
+#: gphoto2/main.c:1861
 msgid "Specify the camera to use"
-msgstr "Specificér kamera-model"
+msgstr "Specificér kamera der skal bruges"
 
-#: gphoto2/main.c:1872
-#, fuzzy
+#: gphoto2/main.c:1863
 msgid "Camera and software configuration"
-msgstr "Kunne ikke sætte konfiguration:"
+msgstr "Kamera- og program-konfiguration"
 
-#: gphoto2/main.c:1874
-#, fuzzy
+#: gphoto2/main.c:1865
 msgid "Capture an image from or on the camera"
-msgstr "Ændr til et katalog i kameraet."
+msgstr "Tag et billede fra eller på kameraet"
 
-#: gphoto2/main.c:1876
+#: gphoto2/main.c:1867
 msgid "Downloading, uploading and manipulating files"
-msgstr ""
+msgstr "Henter, oplægger og manipulerer filer"
 
 #: gphoto2/range.c:104 gphoto2/range.c:158
 #, c-format
@@ -1406,7 +1398,7 @@ msgstr "Afslut gPhoto-skallen"
 
 #: gphoto2/shell.c:126
 msgid "Download a file"
-msgstr "Hjemhent es billede"
+msgstr "Hjemhent en fil"
 
 #: gphoto2/shell.c:126 gphoto2/shell.c:127 gphoto2/shell.c:129
 #: gphoto2/shell.c:131 gphoto2/shell.c:133 gphoto2/shell.c:134
@@ -1415,9 +1407,8 @@ msgid "[directory/]filename"
 msgstr "[katalog/]filnavn"
 
 #: gphoto2/shell.c:127
-#, fuzzy
 msgid "Upload a file"
-msgstr "Hjemhent es billede"
+msgstr "Oplæg en fil"
 
 #: gphoto2/shell.c:128
 msgid "Download a thumbnail"
@@ -1432,14 +1423,12 @@ msgid "Delete"
 msgstr "Slet"
 
 #: gphoto2/shell.c:135
-#, fuzzy
 msgid "Create Directory"
-msgstr "Opret et katalog"
+msgstr "Opret katalog"
 
 #: gphoto2/shell.c:136
-#, fuzzy
 msgid "Remove Directory"
-msgstr "Fjern et katalog"
+msgstr "Fjern katalog"
 
 #: gphoto2/shell.c:141 gphoto2/shell.c:158
 msgid "Displays command usage"
@@ -1458,67 +1447,60 @@ msgid "[directory/]"
 msgstr "[katalog/]"
 
 #: gphoto2/shell.c:145
-#, fuzzy
 msgid "List configuration variables"
-msgstr "Find en konfigurationsvariabel"
+msgstr "Vis konfigurationsvariable"
 
 #: gphoto2/shell.c:146
-#, fuzzy
 msgid "Get configuration variable"
-msgstr "Find en konfigurationsvariabel"
+msgstr "Find konfigurationsvariabel"
 
 #: gphoto2/shell.c:146
 msgid "name"
 msgstr "navn"
 
 #: gphoto2/shell.c:147 gphoto2/shell.c:149
-#, fuzzy
 msgid "Set configuration variable"
-msgstr "Sæt en konfigurationsvariabel"
+msgstr "Sæt konfigurationsvariabel"
 
 #: gphoto2/shell.c:147 gphoto2/shell.c:149
 msgid "name=value"
-msgstr ""
+msgstr "navn=værdi"
 
 #: gphoto2/shell.c:148
-#, fuzzy
 msgid "Set configuration variable index"
-msgstr "Sæt en konfigurationsvariabel"
+msgstr "Sæt konfigurationsvariabelindeks"
 
 #: gphoto2/shell.c:148
 msgid "name=valueindex"
-msgstr ""
+msgstr "navn=værdiindex"
 
 #: gphoto2/shell.c:150
-#, fuzzy
 msgid "Capture a single image"
-msgstr "Tag et billede"
+msgstr "Tag et enkelt billede"
 
 #: gphoto2/shell.c:151
 msgid "Capture a single image and download it"
-msgstr ""
+msgstr "Tag et enkelt billede og hent det"
 
 #: gphoto2/shell.c:152
-#, fuzzy
 msgid "Capture a preview image"
-msgstr "Tag et billede"
+msgstr "Tag et billede til forhåndsvisning"
 
 #: gphoto2/shell.c:153
 msgid "Wait for an event"
-msgstr ""
+msgstr "Vent på en hændelse"
 
 #: gphoto2/shell.c:153 gphoto2/shell.c:154 gphoto2/shell.c:155
-#, fuzzy
 msgid "count or seconds"
-msgstr "sekunder"
+msgstr "antal eller sekunder"
 
 #: gphoto2/shell.c:154
 msgid "Wait for images to be captured and download it"
-msgstr ""
+msgstr "Vent på, at billeder bliver taget, og hent dem"
 
 #: gphoto2/shell.c:155
 msgid "Wait for events and images to be captured and download it"
-msgstr ""
+msgstr "Vent på hændelser og at billeder bliver taget, og hent dem"
 
 #: gphoto2/shell.c:480
 msgid "Invalid command."
@@ -1555,17 +1537,17 @@ msgstr "Fjernkataloget er nu '%s'."
 #: gphoto2/shell.c:854
 #, c-format
 msgid "set-config needs a second argument.\n"
-msgstr ""
+msgstr "set-config behøver et argument nummer to.\n"
 
 #: gphoto2/shell.c:875
 #, c-format
 msgid "set-config-value needs a second argument.\n"
-msgstr ""
+msgstr "set-config-value behøver et argument nummer to.\n"
 
 #: gphoto2/shell.c:896
 #, c-format
 msgid "set-config-index needs a second argument.\n"
-msgstr ""
+msgstr "set-config-index behøver et argument nummer to.\n"
 
 #: gphoto2/shell.c:962
 #, c-format
@@ -1577,7 +1559,7 @@ msgstr ""
 #: gphoto2/shell.c:969
 #, c-format
 msgid "Help on \"%s\":"
-msgstr "Hjælp om \"%s\":"
+msgstr "Hjælp om '%s':"
 
 #: gphoto2/shell.c:971
 #, c-format
@@ -1604,200 +1586,5 @@ msgstr "Tilgængelige kommandoer:"
 msgid "To get help on a particular command, type in 'help command-name'."
 msgstr "For at få hjælp om en speciel kommando så skriv 'help kommando-navn'."
 
-#~ msgid "There are no folders in folder '%s'."
-#~ msgstr "Der findes ingen mapper i mappen '%s'."
-
-#~ msgid "There are %i folders in folder '%s':"
-#~ msgstr "Der findes %i mapper i mappen '%s':"
-
-#~ msgid "There are %i files in folder '%s':"
-#~ msgstr "Der findes %i filer i mappen '%s':"
-
-#~ msgid "Displays this help screen"
-#~ msgstr "Viser denne hjælpetekst"
-
-#~ msgid "List the configuration tree"
-#~ msgstr "Vís konfigurationstræ"
-
-#~ msgid "Capture a movie "
-#~ msgstr "Tag en film"
-
-#~ msgid "Summary of camera status"
-#~ msgstr "Sammenfatning af kamerastatus"
-
-#~ msgid "Camera driver manual"
-#~ msgstr "Kameradrivrutinens manual"
-
-#~ msgid "About the camera driver"
-#~ msgstr "Om kameradrivrutinen"
-
-#~ msgid "Could not close camera connection."
-#~ msgstr "Kunne ikke lukke forbindelse til kamera."
-
-#~ msgid "Sleeping for %d second(s)...\n"
-#~ msgstr "Sover i %d sekunder...\n"
-
-#~ msgid "path"
-#~ msgstr "sti"
-
-#~ msgid "speed"
-#~ msgstr "hastighed"
-
-#~ msgid "model"
-#~ msgstr "model"
-
-#~ msgid "filename"
-#~ msgstr "filnavn"
-
-#~ msgid "usbid"
-#~ msgstr "usbid"
-
-#~ msgid "folder"
-#~ msgstr "mappe"
-
-#~ msgid "count"
-#~ msgstr "antal"
-
-#~ msgid ""
-#~ "gPhoto2 for OS/2 requires you to set the enviroment value CAMLIBS to the "
-#~ "location of the camera libraries. e.g. SET CAMLIBS=C:\\GPHOTO2\\CAM\n"
-#~ msgstr ""
-#~ "gPhoto2 for OS/2 kræver at du sætter miljø-variablen CAMLIBS til "
-#~ "kataloget med kamera-bibliotekerne, fx SET CAMLIBS=C:\\GPHOTO2\\CAM\n"
-
-#~ msgid ""
-#~ "gPhoto2 for OS/2 requires you to set the enviroment value IOLIBS to the "
-#~ "location of the io libraries. e.g. SET IOLIBS=C:\\GPHOTO2\\IOLIB\n"
-#~ msgstr ""
-#~ "gPhoto2 for OS/2 kræver at du sætter miljø-variablen IOLIBS til kataloget "
-#~ "med io-bibliotekerne, fx SET IOLIBS=C:\\GPHOTO2\\IOLIBS\n"
-
-#~ msgid "Usage:\n"
-#~ msgstr "Brug:\n"
-
-#~ msgid ""
-#~ "Short/long options (& argument)        Description\n"
-#~ "--------------------------------------------------------------------------------\n"
-#~ msgstr ""
-#~ "Korte/lange flag (& argument)       Beskrivelse\n"
-#~ "--------------------------------------------------------------------------------\n"
-
-#~ msgid "%-38s %s\n"
-#~ msgstr "%-38s %s\n"
-
-#~ msgid ""
-#~ "--------------------------------------------------------------------------------\n"
-#~ "[Use double-quotes around arguments]        [Picture numbers begin with "
-#~ "one (1)]\n"
-#~ msgstr ""
-#~ "--------------------------------------------------------------------------------\n"
-#~ "[Brug gåseøjne omkring argumenter]          [Foto-numre begynder med ét "
-#~ "(1)    ]\n"
-
-#~ msgid "Jan"
-#~ msgstr "jan"
-
-#~ msgid "January"
-#~ msgstr "januar"
-
-#~ msgid "Feb"
-#~ msgstr "feb"
-
-#~ msgid "February"
-#~ msgstr "februar"
-
-#~ msgid "Mar"
-#~ msgstr "mar"
-
-#~ msgid "March"
-#~ msgstr "marts"
-
-#~ msgid "Apr"
-#~ msgstr "apr"
-
-#~ msgid "April"
-#~ msgstr "april"
-
-#~ msgid "May"
-#~ msgstr "maj"
-
-#~ msgid "Jun"
-#~ msgstr "jun"
-
-#~ msgid "June"
-#~ msgstr "juni"
-
-#~ msgid "Jul"
-#~ msgstr "jul"
-
-#~ msgid "July"
-#~ msgstr "juli"
-
-#~ msgid "Aug"
-#~ msgstr "aug"
-
-#~ msgid "August"
-#~ msgstr "august"
-
-#~ msgid "Sep"
-#~ msgstr "sep"
-
-#~ msgid "September"
-#~ msgstr "september"
-
-#~ msgid "Oct"
-#~ msgstr "okt"
-
-#~ msgid "October"
-#~ msgstr "oktober"
-
-#~ msgid "Nov"
-#~ msgstr "nov"
-
-#~ msgid "November"
-#~ msgstr "november"
-
-#~ msgid "Dec"
-#~ msgstr "dec"
-
-#~ msgid "December"
-#~ msgstr "december"
-
-#~ msgid "Sun"
-#~ msgstr "søn"
-
-#~ msgid "Sunday"
-#~ msgstr "søndag"
-
-#~ msgid "Monday"
-#~ msgstr "mandag"
-
-#~ msgid "Tue"
-#~ msgstr "tir"
-
-#~ msgid "Tuesday"
-#~ msgstr "tirsdag"
-
-#~ msgid "Wed"
-#~ msgstr "ons"
-
-#~ msgid "Wednesday"
-#~ msgstr "onsdag"
-
-#~ msgid "Thu"
-#~ msgstr "tor"
-
-#~ msgid "Thursday"
-#~ msgstr "torsdag"
-
-#~ msgid "Fri"
-#~ msgstr "fre"
-
-#~ msgid "Friday"
-#~ msgstr "fredag"
-
-#~ msgid "Sat"
-#~ msgstr "lør"
-
-#~ msgid "Saturday"
-#~ msgstr "lørdag"
+#~ msgid "You cannot use '%%n' in combination with non-persistent files!"
+#~ msgstr "Du kan ikke bruge '%%n' i kombination med ikke-bestandige filer!"
