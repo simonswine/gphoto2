@@ -1,8 +1,9 @@
 gphoto2 (2.4.11-1) UNRELEASED; urgency=low
 
   * New upstream version
+  * Bump requirement on libgphoto2 to 2.4.11
 
- -- David Paleino <dapal@debian.org>  Mon, 18 Apr 2011 17:30:06 +0200
+ -- David Paleino <dapal@debian.org>  Mon, 18 Apr 2011 17:38:06 +0200
 
 gphoto2 (2.4.10-2) unstable; urgency=low
 
