@@ -1,8 +1,9 @@
 gphoto2 (2.4.11-2) UNRELEASED; urgency=low
 
   * Acknowledge NMU.
+  * Build-Depend on libjpeg-dev (Closes: #641999)
 
- -- David Paleino <dapal@debian.org>  Tue, 13 Sep 2011 16:20:44 +0200
+ -- David Paleino <dapal@debian.org>  Sun, 25 Sep 2011 00:03:28 +0200
 
 gphoto2 (2.4.11-1.1) unstable; urgency=low
 
