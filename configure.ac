@@ -1,6 +1,6 @@
 AC_PREREQ(2.59)
-dnl Next stable release must be 2.4.11 or later
-AC_INIT([gphoto2 command line interface], [2.4.14], [gphoto-devel@lists.sourceforge.net], [gphoto2])
+dnl Next stable release must be 2.5.3 or later
+AC_INIT([gphoto2 command line interface], [2.5.2], [gphoto-devel@lists.sourceforge.net], [gphoto2])
 AC_CONFIG_SRCDIR([gphoto2/main.c])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([auto-m4])
@@ -25,10 +25,9 @@ fi
 GP_CHECK_SHELL_ENVIRONMENT
 GP_CONFIG_MSG([Build])
 GP_CONFIG_MSG([Source code location],[${srcdir}])
-AM_CPPFLAGS="$CPPFLAGS"
-AM_LDFLAGS="$LDFLAGS"
+AM_CPPFLAGS=""
+AM_LDFLAGS=""
 
-AC_CHECK_LIB(m,floor)
 
 dnl ---------------------------------------------------------------------------
 dnl Some programs we need
@@ -36,6 +35,7 @@ dnl ---------------------------------------------------------------------------
 AC_PROG_CC
 AC_PROG_CPP
 AM_PROG_CC_C_O
+m4_pattern_allow([AM_PROG_AR], [AM_PROG_AR])
 AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_SYS_LARGEFILE
@@ -43,9 +43,6 @@ GP_PKG_CONFIG
 
 GP_CONFIG_MSG([Compiler],[${CC}])
 AC_DEFINE_UNQUOTED([HAVE_CC],"$CC",[The C compiler we're using])
-
-AM_CPPFLAGS="$AM_CPPFLAGS -I\$(top_srcdir)"
-AM_CPPFLAGS="$AM_CPPFLAGS -I\$(top_srcdir)/gphoto2"
 
 dnl AC_STRUCT_TIMEZONE
 
@@ -65,8 +62,9 @@ dnl i18n support
 dnl ---------------------------------------------------------------------------
 GP_GETTEXT_HACK([],[Lutz Müller and others],[${MAIL_GPHOTO_TRANSLATION}])
 ALL_LINGUAS="az cs da de en_GB es eu fi fr hu id is it ja nl pa pl pt_BR ro ru rw sk sr sv uk vi zh_CN zh_TW"
-AM_GNU_GETTEXT_VERSION([0.18.1])
+AM_GNU_GETTEXT_VERSION([0.14.1])
 AM_GNU_GETTEXT([external])
+AM_PO_SUBDIRS()
 AM_ICONV()
 GP_GETTEXT_FLAGS()
 
@@ -79,7 +77,7 @@ AM_CPPFLAGS="$AM_CPPFLAGS -DLOCALEDIR=\\\"${localedir}\\\""
 dnl ---------------------------------------------------------------------------
 dnl Check for libgphoto2
 dnl ---------------------------------------------------------------------------
-GP_CHECK_LIBRARY([LIBGPHOTO2], [libgphoto2], [>= 2.4.14])
+GP_CHECK_LIBRARY([LIBGPHOTO2], [libgphoto2], [>= 2.5.0])
 
 
 AC_CHECK_FUNCS([strptime])
@@ -89,6 +87,8 @@ AC_CHECK_FUNCS([signal pause sleep])
 
 AC_HEADER_STDC
 AC_CHECK_HEADERS([fcntl.h])
+
+AC_CHECK_LIB(m,floor)
 
 
 dnl ---------------------------------------------------------------------------
@@ -252,15 +252,13 @@ dnl aalib: gphoto2 (the frontend) has been designed as a command-line tool.
 dnl        However, life previews make only sense when you can actually 
 dnl        see the preview. This is where aalib fits in - it gives you the
 dnl        possibility to view life-previews on any console.
-dnl        ... 
-dnl        in newer times we default just save them to disk.
 dnl ---------------------------------------------------------------------------
 aa_msg="no (http://www.sourceforge.net/projects/aa-project)"
 try_aa=false
 have_aa=false
-AC_ARG_WITH([aalib],AS_HELP_STRING([--with-aalib],[Use aalib for jpeg preview]),[
+AC_ARG_WITH([aalib],AS_HELP_STRING([--with-aalib],[Do use aalib for preview ASCII rendering]),[
         if test x$withval = xyes; then
-                try_aa=true
+                try_aa=:
         fi
 ])
 if $try_aa; then
@@ -344,12 +342,11 @@ dnl ---------------------------------------------------------------------------
 dnl Turn on all warnings when using gcc
 dnl ---------------------------------------------------------------------------
 if test "$GCC" = "yes"; then
-	AM_CPPFLAGS="$AM_CPPFLAGS -Wall"
-	AM_CPPFLAGS="$AM_CPPFLAGS -Wmissing-declarations -Wmissing-prototypes"
-	AM_LDFLAGS="$AM_LDFLAGS -Wall"
+	CFLAGS="$CFLAGS -Wall"
+	CFLAGS="$CFLAGS -Wmissing-declarations -Wmissing-prototypes"
 	# FIXME: Check for --enable-debug here
-	AM_CPPFLAGS="$AM_CPPFLAGS -g"
-	AM_LDFLAGS="$AM_LDFLAGS -g"
+	CFLAGS="$CFLAGS -g"
+	LDFLAGS="$LDFLAGS -g"
 fi
 
 AM_CPPFLAGS="$AM_CPPFLAGS -D_GPHOTO2_INTERNAL_CODE"
@@ -370,6 +367,11 @@ contrib/Makefile
 packaging/Makefile
 packaging/rpm/Makefile
 packaging/rpm/package.spec
+tests/data/Makefile
+tests/staging/subdir1/Makefile
+tests/staging/subdir2/Makefile
+tests/staging/Makefile
+tests/Makefile
 ])
 AC_OUTPUT()dnl
 

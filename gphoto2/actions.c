@@ -49,9 +49,9 @@
 #  include <libexif/exif-data.h>
 #endif
 
-#define CR(result)       {int r=(result); if (r<0) return r;}
-#define CRU(result,file) {int r=(result); if (r<0) {gp_file_unref(file);return r;}}
-#define CL(result,list)  {int r=(result); if (r<0) {gp_list_free(list); return r;}}
+#define CR(result)       {int __r=(result); if (__r<0) return __r;}
+#define CRU(result,file) {int __r=(result); if (__r<0) {gp_file_unref(file);return __r;}}
+#define CL(result,list)  {int __r=(result); if (__r<0) {gp_list_free(list); return __r;}}
 
 #ifdef __GNUC__
 #define __unused__ __attribute__((unused))
@@ -60,6 +60,16 @@
 #endif
 
 static int print_widget (GPParams *p, const char*name, CameraWidget *widget);
+
+static long
+timediff_now (struct timeval *target) {
+	struct timeval now;
+
+	gettimeofday (&now, NULL);
+	return	(target->tv_sec-now.tv_sec)*1000+
+		(target->tv_usec-now.tv_usec)/1000;
+}
+
 
 int
 delete_all_action (GPParams *p)
@@ -72,6 +82,7 @@ action_camera_upload_file (GPParams *p, const char *folder, const char *path)
 {
 	CameraFile *file;
 	int res;
+	char *fn;
 
 	gp_log (GP_LOG_DEBUG, "main", "Uploading file...");
 
@@ -81,16 +92,12 @@ action_camera_upload_file (GPParams *p, const char *folder, const char *path)
 		gp_file_unref (file);
 		return res;
 	}
+	if (p->filename && strcmp (p->filename, ""))
+		fn = p->filename;
+	else
+		fn = basename (path);
 
-	/* Check if the user specified a filename */
-	if (p->filename && strcmp (p->filename, "")) {
-		res = gp_file_set_name (file, p->filename);
-		if (res < 0) {
-			gp_file_unref (file);
-			return (res);
-		}
-	}
-	res = gp_camera_folder_put_file (p->camera, folder, file,
+	res = gp_camera_folder_put_file (p->camera, folder, fn, GP_FILE_TYPE_NORMAL, file,
 					 p->context);
 	gp_file_unref (file);
 	return (res);
@@ -101,6 +108,7 @@ action_camera_upload_metadata (GPParams *p, const char *folder, const char *path
 {
 	CameraFile *file;
 	int res;
+	char *fn = NULL;
 
 	gp_log (GP_LOG_DEBUG, "main", "Uploading metadata...");
 
@@ -113,21 +121,11 @@ action_camera_upload_metadata (GPParams *p, const char *folder, const char *path
 
 	/* Check if the user specified a filename */
 	if (p->filename && strcmp (p->filename, "")) {
-		res = gp_file_set_name (file, p->filename);
-		if (res < 0) {
-			gp_file_unref (file);
-			return (res);
-		}
+		fn = p->filename;
 	} else if (path == strstr(path, "meta_")) {
-		res = gp_file_set_name (file, path+5);
-		if (res < 0) {
-			gp_file_unref (file);
-			return (res);
-		}
+		fn = path+5;
 	}
-	gp_file_set_type (file, GP_FILE_TYPE_METADATA);
-
-	res = gp_camera_folder_put_file (p->camera, folder, file,
+	res = gp_camera_folder_put_file (p->camera, folder, fn, GP_FILE_TYPE_METADATA, file,
 					 p->context);
 	gp_file_unref (file);
 	return (res);
@@ -186,14 +184,22 @@ list_folders_action (GPParams *p)
 	CL (gp_camera_folder_list_folders (p->camera, p->folder, list,
 					   p->context), list);
 	CL (count = gp_list_count (list), list);
-        printf(ngettext(
-		"There is %d folder in folder '%s'.\n", 
-		"There are %d folders in folder '%s'.\n",
-		count
-	), count, p->folder);
+	if (!(p->flags & FLAGS_QUIET))
+		printf(ngettext(
+			"There is %d folder in folder '%s'.\n", 
+			"There are %d folders in folder '%s'.\n",
+			count
+		), count, p->folder);
+
 	for (i = 0; i < count; i++) {
 		CL (gp_list_get_name (list, i, &name), list);
-		printf (" - %s\n", name);
+		if (p->flags & FLAGS_QUIET) {
+			if (!strcmp(p->folder,"/"))
+				printf ("/%s\n", name);
+			else
+				printf ("%s/%s\n", p->folder, name);
+		} else
+			printf (" - %s\n", name);
 	}
 	gp_list_free (list);
 	return (GP_OK);
@@ -225,30 +231,33 @@ list_files_action (GPParams *p)
 		}
 	}
 	else
-	  filecount = count;
-        if (filecount == 0) { /* 0 is weird still, despite ngettext() */
-	   printf(_("There is no file in folder '%s'.\n"), p->folder);
-        } else {
-	   printf(ngettext(
-		"There is %d file in folder '%s'.\n",
-		"There are %d files in folder '%s'.\n",
-		filecount
-	   ), filecount, p->folder);
-        }
+		filecount = count;
+
+	if (!(p->flags & FLAGS_QUIET)) { /* do not print that in quiet mode */
+        	if (filecount == 0) { /* 0 is weird still, despite ngettext() */
+			printf(_("There is no file in folder '%s'.\n"), p->folder);
+		} else {
+			printf(ngettext(
+				"There is %d file in folder '%s'.\n",
+				"There are %d files in folder '%s'.\n",
+				filecount
+			), filecount, p->folder);
+		}
+	}
 	for (i = 0; i < count; i++) {
 		CL (gp_list_get_name (list, i, &name), list);
-		CL (print_file_action (p, name), list);
+		CL (print_file_action (p, p->folder, name), list);
 	}
 	gp_list_free (list);
 	return (GP_OK);
 }
 
 int
-print_info_action (GPParams *p, const char *filename)
+print_info_action (GPParams *p, const char *folder, const char *filename)
 {
 	CameraFileInfo info;
 
-	CR (gp_camera_file_get_info (p->camera, p->folder, filename, &info,
+	CR (gp_camera_file_get_info (p->camera, folder, filename, &info,
 				     p->context));
 
 	printf (_("Information on file '%s' (folder '%s'):\n"),
@@ -257,8 +266,6 @@ print_info_action (GPParams *p, const char *filename)
 	if (info.file.fields == GP_FILE_INFO_NONE)
 		printf (_("  None available.\n"));
 	else {
-		if (info.file.fields & GP_FILE_INFO_NAME)
-			printf (_("  Name:        '%s'\n"), info.file.name);
 		if (info.file.fields & GP_FILE_INFO_TYPE)
 			printf (_("  Mime type:   '%s'\n"), info.file.type);
 		if (info.file.fields & GP_FILE_INFO_SIZE)
@@ -320,14 +327,14 @@ print_info_action (GPParams *p, const char *filename)
 }
 
 int
-print_file_action (GPParams *p, const char *filename)
+print_file_action (GPParams *p, const char *folder, const char *filename)
 {
 	static int x = 0;
 
 	if (p->flags & FLAGS_NEW) {
 		CameraFileInfo info;
 		
-		CR (gp_camera_file_get_info (p->camera, p->folder,
+		CR (gp_camera_file_get_info (p->camera, folder,
 					     filename, &info, p->context));
 		if (info.file.fields & GP_FILE_INFO_STATUS &&
 		    info.file.status == GP_FILE_STATUS_DOWNLOADED) {
@@ -337,10 +344,10 @@ print_file_action (GPParams *p, const char *filename)
 	}
 
 	if (p->flags & FLAGS_QUIET)
-		printf ("\"%s\"\n", filename);
+		printf ("%s/%s\n", folder, filename);
 	else {
 		CameraFileInfo info;
-		if (gp_camera_file_get_info (p->camera, p->folder, filename,
+		if (gp_camera_file_get_info (p->camera, folder, filename,
 					     &info, NULL) == GP_OK) {
 		    printf("#%-5i %-27s", x+1, filename);
 		    if (info.file.fields & GP_FILE_INFO_PERMISSIONS) {
@@ -364,72 +371,72 @@ print_file_action (GPParams *p, const char *filename)
 }
 
 int
-save_file_action (GPParams *p, const char *filename)
+save_file_action (GPParams *p, const char *folder, const char *filename)
 {
 	return (save_file_to_file (p->camera, p->context, p->flags,
-				   p->folder, filename, GP_FILE_TYPE_NORMAL));
+				   folder, filename, GP_FILE_TYPE_NORMAL));
 }
 
 int
-save_exif_action (GPParams *p, const char *filename)
+save_exif_action (GPParams *p, const char *folder, const char *filename)
 {
 	return (save_file_to_file (p->camera, p->context, p->flags,
-				   p->folder, filename, GP_FILE_TYPE_EXIF));
+				   folder, filename, GP_FILE_TYPE_EXIF));
 }
 
 int
-save_meta_action (GPParams *p, const char *filename)
+save_meta_action (GPParams *p, const char *folder, const char *filename)
 {
 	return (save_file_to_file (p->camera, p->context, p->flags,
-				   p->folder, filename, GP_FILE_TYPE_METADATA));
+				   folder, filename, GP_FILE_TYPE_METADATA));
 }
 
 int
-save_thumbnail_action (GPParams *p, const char *filename)
+save_thumbnail_action (GPParams *p, const char *folder, const char *filename)
 {
 	return (save_file_to_file (p->camera, p->context, p->flags,
-				   p->folder, filename, GP_FILE_TYPE_PREVIEW));
+				   folder, filename, GP_FILE_TYPE_PREVIEW));
 }
 
 int
-save_raw_action (GPParams *p, const char *filename)
+save_raw_action (GPParams *p, const char *folder, const char *filename)
 {
 	return (save_file_to_file (p->camera, p->context, p->flags,
-				   p->folder, filename, GP_FILE_TYPE_RAW));
+				   folder, filename, GP_FILE_TYPE_RAW));
 }
 
 int
-save_audio_action (GPParams *p, const char *filename)
+save_audio_action (GPParams *p, const char *folder, const char *filename)
 {
 	return (save_file_to_file (p->camera, p->context, p->flags,
-				   p->folder, filename, GP_FILE_TYPE_AUDIO));
+				   folder, filename, GP_FILE_TYPE_AUDIO));
 }
 
 int
-save_all_audio_action (GPParams *p, const char *filename)
+save_all_audio_action (GPParams *p, const char *folder, const char *filename)
 {
 	/* not every file has an associated audio file */
-	if (camera_file_exists(p->camera, p->context, p->folder, filename,
+	if (camera_file_exists(p->camera, p->context, folder, filename,
 			       GP_FILE_TYPE_AUDIO))
 		return (save_file_to_file (p->camera, p->context, p->flags,
-					   p->folder, filename,
+					   folder, filename,
 					   GP_FILE_TYPE_AUDIO));
 	return GP_OK;
 }
 
 int
-delete_file_action (GPParams *p, const char *filename)
+delete_file_action (GPParams *p, const char *folder, const char *filename)
 {
 	if (p->flags & FLAGS_NEW) {
 		CameraFileInfo info;
 		
-		CR (gp_camera_file_get_info (p->camera, p->folder, filename,
+		CR (gp_camera_file_get_info (p->camera, folder, filename,
 					     &info, p->context));
 		if (info.file.fields & GP_FILE_INFO_STATUS &&
 		    info.file.status == GP_FILE_STATUS_DOWNLOADED)
 			return (GP_OK);
 	}
-	return (gp_camera_file_delete (p->camera, p->folder, filename,
+	return (gp_camera_file_delete (p->camera, folder, filename,
 				       p->context));
 }
 
@@ -470,7 +477,7 @@ print_hline (void)
 #endif
 
 int
-print_exif_action (GPParams *p, const char *filename)
+print_exif_action (GPParams *p, const char *folder, const char *filename)
 {
 #ifdef HAVE_LIBEXIF
         CameraFile *file;
@@ -482,7 +489,7 @@ print_exif_action (GPParams *p, const char *filename)
 #endif
 
         CR (gp_file_new (&file));
-        CRU (gp_camera_file_get (p->camera, p->folder, filename,
+        CRU (gp_camera_file_get (p->camera, folder, filename,
 				 GP_FILE_TYPE_EXIF, file, p->context), file);
         CRU (gp_file_get_data_and_size (file, &data, &size), file);
         ed = exif_data_new_from_data ((unsigned char *)data, size);
@@ -618,10 +625,13 @@ list_ports_action (GPParams *p)
 
 	/* Now list the ports */
 	for (x = 0; x < count; x++) {
+		char *xname, *xpath;
 		result = gp_port_info_list_get_info (p->portinfo_list, x, &info);
 		if (result < 0)
 			break;
-		printf ("%-32s %-32s\n", info.path, info.name);
+		gp_port_info_get_name (info, &xname);
+		gp_port_info_get_path (info, &xpath);
+		printf ("%-32s %-32s\n", xpath, xname);
 	}
 	return (result);
 
@@ -715,6 +725,7 @@ action_camera_set_port (GPParams *params, const char *port)
 {
 	int p, r;
 	GPPortInfo info;
+	char *path;
 	char verified_port[1024];
 
 	verified_port[sizeof (verified_port) - 1] = '\0';
@@ -774,7 +785,8 @@ action_camera_set_port (GPParams *params, const char *port)
 	r = gp_camera_set_port_info (params->camera, info);
 	if (r < 0)
 		return (r);
-	gp_setting_set ("gphoto2", "port", info.path);
+	gp_port_info_get_path (info, &path);
+	gp_setting_set ("gphoto2", "port", path);
 	return (GP_OK);
 }
 
@@ -820,11 +832,13 @@ action_camera_manual (GPParams *params)
 int
 action_camera_set_speed (GPParams *p, unsigned int speed)
 {
-	GPPortInfo info;
+	GPPortInfo	info;
+	GPPortType	type;
 
 	/* Make sure we've got a serial port. */
 	CR (gp_camera_get_port_info (p->camera, &info));
-	if (info.type != GP_PORT_SERIAL) {
+	gp_port_info_get_type (info, &type);
+	if (type != GP_PORT_SERIAL) {
 		if ((p->flags & FLAGS_QUIET) == 0) {
 			fprintf (stderr, _("You can only specify speeds for "
 					   "serial ports."));
@@ -891,7 +905,7 @@ print_version_action (GPParams __unused__ *p)
 		  "\n"
 		  "This version of gphoto2 is using the following software versions and options:\n"),
 		VERSION,
-		2012, /* year of release! */
+		2013, /* year of release! */
 		port_message
 		);
 
@@ -947,16 +961,16 @@ action_camera_capture_preview (GPParams *p)
 #endif
 	if (r < 0) {
 		gp_file_unref (file);
-		if (fd != -1)
-			unlink (tmpname);
+		unlink (tmpname);
 		return (r);
 	}
 
-	r = save_camera_file_to_file (NULL, file, tmpfilename);
+	r = save_camera_file_to_file (NULL, "capture_preview", GP_FILE_TYPE_NORMAL, file, tmpfilename);
 	gp_file_unref (file);
-	if (r < 0) 
+	if (r < 0) {
+		unlink (tmpname);
 		return (r);
-
+	}
 	return (GP_OK);
 }
 
@@ -970,8 +984,9 @@ action_camera_capture_movie (GPParams *p, const char *arg)
 	int		fd;
 	time_t		st;
 	enum moviemode	mm;
-	int		frames;
+	int		frames,captured_frames=0;
 	char		*xname;
+	struct timeval	starttime;
 
 	if (p->flags & FLAGS_STDOUT) {
 		fd = dup(fileno(stdout));
@@ -1000,6 +1015,7 @@ action_camera_capture_movie (GPParams *p, const char *arg)
 		}
 	}
 	CR (gp_file_new_from_fd (&file, fd));
+	gettimeofday (&starttime, NULL);
 	while (1) {
 		const char *mime;
 		r = gp_camera_capture_preview (p->camera, file, p->context);
@@ -1013,6 +1029,8 @@ action_camera_capture_movie (GPParams *p, const char *arg)
 			break;
 		}
 
+		captured_frames++;
+
 		if (glob_cancel) {
 			fprintf(stderr, _("Ctrl-C pressed ... Exiting.\n"));
 			break;
@@ -1022,56 +1040,98 @@ action_camera_capture_movie (GPParams *p, const char *arg)
 				break;
 		}
 		if (mm == MOVIE_SECONDS) {
-			time_t	xt;
-			time (&xt);
-			if (xt >= st + frames)
+			if ((-timediff_now (&starttime)) >= frames*1000)
 				break;
 		}
 	}
 	gp_file_unref (file);
-	return (GP_OK);
+
+	fprintf(stderr,_("Movie capture finished (%d frames)\n"), captured_frames);
+	return GP_OK;
 }
 
-/* count < 0 means exact seconds timer.
- * count > 0 means number of events (with 1 second timeout events).
+
+/* 
+ * arg can be:
+ * events as number			e.g.: 1000
+ * frames as number with suffix f 	e.g.: 100f
+ * seconds as number with suffix s 	e.g.: 50s
+ * milliseconds as number with suffix mse.g.: 200ms
  */
 int
-action_camera_wait_event (GPParams *p, int dodownload, int count)
+action_camera_wait_event (GPParams *p, enum download_type downloadtype, const char*arg)
 {
 	int ret;
+	struct waitparams wp;
 	CameraEventType	event;
 	void	*data = NULL;
 	CameraFilePath	*fn;
 	CameraFilePath last;
 	struct timeval	xtime;
+	int events, frames;
 
 	gettimeofday (&xtime, NULL);
 	memset(&last,0,sizeof(last));
 
-	if (!count) count = 1;
+	wp.type = WAIT_EVENTS;
+	wp.u.events = 1000000;
+	if (!arg) {
+		printf ( _("Waiting for events from camera. Press Ctrl-C to abort.\n"));
+	} else {
+		int x;
+		if ((arg[strlen(arg)-1]=='f') && sscanf(arg,"%df", &x)) { /* exact nr of frames */ 
+			wp.type			= WAIT_FRAMES;
+			wp.u.frames		= x;
+			printf ( _("Waiting for %d frames from the camera. Press Ctrl-C to abort.\n"), x);
+		}
+		if ((strlen(arg)>2) && (!strcmp(&arg[strlen(arg)-2],"ms")) && sscanf(arg,"%dms",&x)) { /* exact milliseconds */ 
+			wp.type			= WAIT_TIME;
+			wp.u.milliseconds	= x;
+			printf ( _("Waiting for %d milliseconds for events from camera. Press Ctrl-C to abort.\n"), x);
+		}
+		if ((wp.type != WAIT_TIME) && (arg[strlen(arg)-1]=='s') && sscanf(arg,"%ds", &x)) { /* exact seconds */ 
+			wp.type			= WAIT_TIME;
+			wp.u.milliseconds	= x*1000;
+			printf ( _("Waiting for %d seconds for events from camera. Press Ctrl-C to abort.\n"), x);
+		}
+		if (wp.type == WAIT_EVENTS) {
+			wp.u.events = atoi(arg);
+			printf ( _("Waiting for %d events from camera. Press Ctrl-C to abort.\n"), wp.u.events);
+		}
+	}
+
+	events = frames = 0;
 	while (1) {
 		int 		leftoverms = 1000;
 		struct timeval	ytime;
-		int		x;
+		int		x, exitloop;
 
 		if (glob_cancel) break;
-		if (!count) break;
-		if (count > 0) count--;
 
-		if (count < 0) { /* in exact seconds */
+		exitloop = 0;
+		switch (wp.type) {
+		case WAIT_EVENTS:
+			if (events >= wp.u.events) exitloop = 1;
+			break;
+		case WAIT_FRAMES:
+			if (frames >= wp.u.frames) exitloop = 1;
+			break;
+		case WAIT_TIME:
 			gettimeofday (&ytime, NULL);
 
-			x = (ytime.tv_usec-xtime.tv_usec)+(ytime.tv_sec-xtime.tv_sec)*1000000;
-			if (x > (-count*1000000)) break;
+			x = ((ytime.tv_usec-xtime.tv_usec)+(ytime.tv_sec-xtime.tv_sec)*1000000)/1000;
+			if (x >= wp.u.milliseconds) { exitloop = 1; break; }
 			/* if left over time is < 1s, set it... otherwise wait at most 1s */
-			if ((-(count*1000000)-x) < leftoverms*1000)
-				leftoverms = (-(count*1000000)-x)/1000;
+			if ((wp.u.milliseconds-x) < leftoverms)
+				leftoverms = wp.u.milliseconds-x;
 		}
+		if (exitloop) break;
 
 		data = NULL;
 		ret = gp_camera_wait_for_event (p->camera, leftoverms, &event, &data, p->context);
 		if (ret != GP_OK)
 			return ret;
+		events++;
 		switch (event) {
 		case GP_EVENT_UNKNOWN:
 			if (data) {
@@ -1087,9 +1147,11 @@ action_camera_wait_event (GPParams *p, int dodownload, int count)
 			printf("CAPTURECOMPLETE\n");
 			break;
 		case GP_EVENT_FILE_ADDED:
+			frames++;
+
 			fn = (CameraFilePath*)data;
 
-			if (!dodownload) {
+			if (downloadtype == DT_NO_DOWNLOAD) {
 				printf("FILEADDED %s %s\n",fn->name, fn->folder);
 				continue;
 			}
@@ -1116,12 +1178,14 @@ action_camera_wait_event (GPParams *p, int dodownload, int count)
 				return (ret);
 			}
 
-			do {
-				ret = delete_file_action (p, fn->name);
-			} while (ret == GP_ERROR_CAMERA_BUSY);
-			if (ret != GP_OK) {
-				cli_error_print ( _("Could not delete image."));
-				/* dont continue in event loop */
+			if (!(p->flags & FLAGS_KEEP)) {
+				do {
+					ret = delete_file_action (p, p->folder, fn->name);
+				} while (ret == GP_ERROR_CAMERA_BUSY);
+				if (ret != GP_OK) {
+					cli_error_print ( _("Could not delete image."));
+					/* dont continue in event loop */
+				}
 			}
 			break;
 		case GP_EVENT_FOLDER_ADDED:
@@ -1266,11 +1330,7 @@ override_usbids_action (GPParams *p, int usb_vendor, int usb_product,
 static struct timeval glob_tv_zero = { 0, 0 };
 
 static void
-#ifdef __GNUC__
-		__attribute__((__format__(printf,3,0)))
-#endif
-debug_func (GPLogLevel level, const char *domain, const char *format,
-	    va_list args, void *data)
+debug_func (GPLogLevel level, const char *domain, const char *str, void *data)
 {
 	struct timeval tv;
 	long sec, usec;
@@ -1280,9 +1340,7 @@ debug_func (GPLogLevel level, const char *domain, const char *format,
 	sec = tv.tv_sec  - glob_tv_zero.tv_sec;
 	usec = tv.tv_usec - glob_tv_zero.tv_usec;
 	if (usec < 0) {sec--; usec += 1000000L;}
-	fprintf (logfile, "%li.%06li %s(%i): ", sec, usec, domain, level);
-	vfprintf (logfile, format, args);
-	fputc ('\n', logfile);
+	fprintf (logfile, "%li.%06li %s(%i): %s\n", sec, usec, domain, level, str);
 }
 
 int
@@ -1689,8 +1747,10 @@ set_config_action (GPParams *p, const char *name, const char *value) {
 		int	t = -1;
 		struct tm xtm;
 
+		if (!strcasecmp (value, "now")	|| !strcasecmp (value, _("now")))
+			t = time(NULL);
 #ifdef HAVE_STRPTIME
-		if (strptime (value, "%c", &xtm) || strptime (value, "%Ec", &xtm))
+		else if (strptime (value, "%c", &xtm) || strptime (value, "%Ec", &xtm))
 			t = mktime (&xtm);
 #endif
 		if (t == -1) {

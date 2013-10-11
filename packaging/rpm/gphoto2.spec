@@ -1,11 +1,11 @@
 Summary: Command line interface to libgphoto2
 Name: gphoto2
-Version: 2.4.14
+Version: 2.5.2
 Release: 1
 License: LGPL
 Group: Applications/Multimedia
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
-Source: http://www.gphoto.org/dist/gphoto2-2.4.14.tar.gz
+Source: http://www.gphoto.org/dist/gphoto2-2.5.2.tar.gz
 Url: http://www.gphoto.org/
 ExcludeArch: s390 s390x
 Provides: gphoto2
