@@ -214,7 +214,7 @@ shell_read_line (void)
 	line = malloc (1024);
 	if (!line)
 		return (NULL);
-	printf (SHELL_PROMPT, prompt, p->folder);
+	fputs (prompt, stdout);
 	fflush(stdout);
 	tmp = fgets (line, 1023, stdin);
 	if (tmp == NULL)
@@ -710,7 +710,7 @@ shell_file_action (Camera __unused__ *camera, GPContext __unused__ *context,
 		CHECK (shell_arg (args, x, arg));
 		CHECK (shell_construct_path (folder, arg,
 					     dest_folder, dest_filename));
-		CHECK (action (p, dest_filename));
+		CHECK (action (p, dest_folder, dest_filename));
 	}
 
 	return (GP_OK);
@@ -916,26 +916,12 @@ shell_capture_preview (Camera __unused__ *camera, const char __unused__ *args) {
 
 static int
 shell_wait_event (Camera *camera, const char *args) {
-	int evts = 1;
-	if (args) {
-		if (strchr(args,'s'))
-			evts=-atoi(args);
-		else
-			evts=atoi(args);
-	}
-	return action_camera_wait_event (p, 0, evts);
+	return action_camera_wait_event (p, DT_NO_DOWNLOAD, args);
 }
 
 static int
 shell_capture_tethered (Camera *camera, const char *args) {
-	int evts = 1;
-	if (args) {
-		if (strchr(args,'s'))
-			evts=-atoi(args);
-		else
-			evts=atoi(args);
-	}
-	return action_camera_wait_event (p, 1, evts);
+	return action_camera_wait_event (p, DT_DOWNLOAD, args);
 }
 
 

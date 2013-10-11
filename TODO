@@ -1,5 +1,15 @@
-Hans Ulrich Niedermann <gp@n-dimensional.de>
+some orthogonalization of the options:
 
-And re-design the complete command line syntax into something
-consistent, powerful and easy to understand, using one command line
-parser instead of two.
+- unify frame count handling
+
+  use --frames / -F  for both controlled capture and waitevents?
+
+- download or not download flag
+
+  introduce --download / --no-download flag?
+  both for --capture-image and --wait-event
+
+
+- --list-ids
+
+  to list USB ids
